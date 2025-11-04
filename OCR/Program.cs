@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using OCR.Data;
 using OCR.Repositories;
@@ -11,14 +12,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<OCRAuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OCRAuthConnectionString")));
+builder.Services.AddDbContext<OCRDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("OCRConnectionString")));
 
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+builder.Services.AddScoped<IDocumentRepository, LocalDocumentRepository>();
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()
@@ -60,6 +65,12 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Documents")),
+    RequestPath = "/Documents"
+    //https://localhost:7242/Images/filename.jpg
+});
 
 app.MapControllers();
 
