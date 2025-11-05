@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OCR.Data;
 
@@ -11,9 +12,11 @@ using OCR.Data;
 namespace OCR.Migrations.OCRDb
 {
     [DbContext(typeof(OCRDbContext))]
-    partial class OCRDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251105141841_add table RecognizedDocument")]
+    partial class addtableRecognizedDocument
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
