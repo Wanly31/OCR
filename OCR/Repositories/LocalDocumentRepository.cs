@@ -19,6 +19,20 @@ namespace OCR.Repositories
             this.httpContextAccessor = httpContextAccessor;
             this.dbContext = dbContext;
         }
+
+        // ✅ Отримати документ по Id
+        public async Task<Document?> GetByIdAsync(Guid id)
+        {
+            return await dbContext.Documents.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        // ✅ Зберегти розпізнаний текст
+        public async Task SaveRecognizedTextAsync(RecognizedText text)
+        {
+            await dbContext.RecognizedTexts.AddAsync(text);
+            await dbContext.SaveChangesAsync();
+        }
+
         public async Task<Document> Upload(Document document)
         {
             var localFilePath = Path.Combine(webHostEnvironment.ContentRootPath, "Documents",

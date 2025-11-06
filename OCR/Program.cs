@@ -5,6 +5,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using OCR.Data;
 using OCR.Repositories;
+using OCR.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<AzureOcrService>();
 
 builder.Services.AddDbContext<OCRAuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OCRAuthConnectionString")));

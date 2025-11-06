@@ -11,8 +11,8 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         //Foreign key   
-        public Guid DocumentId { get; set; }
-        public Document Document{ get; set; }
+        public Guid RecognizedTextId { get; set; }
+        public RecognizedText RecognizedText { get; set; }
 
     }
 }
