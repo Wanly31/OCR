@@ -6,11 +6,22 @@ using Microsoft.IdentityModel.Tokens;
 using OCR.Data;
 using OCR.Repositories;
 using OCR.Services;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+//add Logger
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/Log.txt", rollingInterval: RollingInterval.Minute)
+    .MinimumLevel.Warning()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
@@ -18,6 +29,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AzureOcrService>();
+builder.Services.AddScoped<RecognizeTextService>();
 
 builder.Services.AddDbContext<OCRAuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OCRAuthConnectionString")));
@@ -26,6 +38,8 @@ builder.Services.AddDbContext<OCRDbContext>(options =>
 
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IDocumentRepository, LocalDocumentRepository>();
+builder.Services.AddScoped<IRecognizeTextRepository, LocalRecognizeTextRepository>();
+builder.Services.AddScoped<ITextRepository, LocalTextRepository>();
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()

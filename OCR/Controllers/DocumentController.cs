@@ -11,7 +11,6 @@ namespace OCR.Controllers
     [ApiController]
     public class DocumentController : ControllerBase
     {
-
         public DocumentController(IDocumentRepository documentRepository)
         {
             DocumentRepository = documentRepository;
@@ -43,42 +42,27 @@ namespace OCR.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPost("{id}/recognize")]
-        public async Task<IActionResult> Recognize(Guid id, [FromServices] AzureOcrService ocrService)
+        [HttpGet]
+        public async Task<IActionResult> GetAllAsync()
         {
-            // 1️⃣ Знайти документ у базі
-            var document = await DocumentRepository.GetByIdAsync(id);
-            if (document == null)
-                return NotFound("Document not found.");
+            var DocumentsDomain = await DocumentRepository.GetAllAsync();
 
-            // 2️⃣ Побудувати абсолютний шлях до файлу у папці Documents
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Documents", $"{document.FileName}{document.FileExtension}");
+            var documentDto = new List<DocumentDto>();
 
-            // 3️⃣ Перевірити, чи файл існує
-            if (!System.IO.File.Exists(filePath))
-                return NotFound($"File not found at path: {filePath}");
-
-            // 4️⃣ Викликати Azure OCR сервіс для розпізнавання
-            string recognizedText = await ocrService.ReadDocumentAsync(filePath);
-
-            // 5️⃣ Зберегти результат у базі
-            var recognized = new RecognizedText
+            foreach (var documentDomain in DocumentsDomain)
             {
-                Id = Guid.NewGuid(),
-                DocumentId = document.Id,
-                Text = recognizedText
-            };
+                documentDto.Add(new DocumentDto
+                {
+                    FileName = documentDomain.FileName,
+                    FileDescription = documentDomain.FileDescription,
+                    File = documentDomain.File,
+                    FileSizeInBytes = documentDomain.FileSizeInBytes
+                }
+                );
+            }
 
-            await DocumentRepository.SaveRecognizedTextAsync(recognized);
-
-            // 6️⃣ Повернути результат клієнту
-            return Ok(new
-            {
-                DocumentId = document.Id,
-                Text = recognizedText
-            });
+            return Ok(documentDto);
         }
-
 
 
         private void ValidateFileUpload(DocumentUploadRequestDto request)
