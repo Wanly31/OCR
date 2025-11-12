@@ -43,7 +43,7 @@ namespace OCR.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAll()
         {
             var DocumentsDomain = await DocumentRepository.GetAllAsync();
 
@@ -60,6 +60,22 @@ namespace OCR.Controllers
                 }
                 );
             }
+
+            return Ok(documentDto);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var document = await DocumentRepository.GetByIdAsync(id);
+
+            var documentDto = new DocumentDto
+            {
+                Id = document.Id,
+                FileName = document.FileName,
+                FileDescription = document.FileDescription,
+                FileSizeInBytes = document.FileSizeInBytes
+            };
 
             return Ok(documentDto);
         }

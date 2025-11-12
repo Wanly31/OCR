@@ -39,7 +39,7 @@ builder.Services.AddDbContext<OCRDbContext>(options =>
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IDocumentRepository, LocalDocumentRepository>();
 builder.Services.AddScoped<IRecognizeTextRepository, LocalRecognizeTextRepository>();
-builder.Services.AddScoped<ITextRepository, LocalTextRepository>();
+builder.Services.AddScoped<IRecognizeRepository, LocalRecognizeRepository>();
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()

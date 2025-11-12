@@ -10,7 +10,7 @@ namespace OCR.Data
         }
 
         public DbSet<Document> Documents { get; set; }
-        public DbSet<RecognizedDocument> RecognizedDocuments { get; set; }
-        public DbSet<RecognizedText> RecognizedTexts { get; set; }
+        public DbSet<RecognizeText> RecognizedDocuments { get; set; }
+        public DbSet<Recognize> RecognizedTexts { get; set; }
     }
 }

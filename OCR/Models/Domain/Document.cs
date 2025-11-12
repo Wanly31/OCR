@@ -14,7 +14,7 @@ namespace OCR.Models.Domain
         public long FileSizeInBytes { get; set; }
         public string FilePath { get; set; }
 
-        public RecognizedText? RecognizedText { get; set; }
+        public Recognize? RecognizedText { get; set; }
 
     }
 }

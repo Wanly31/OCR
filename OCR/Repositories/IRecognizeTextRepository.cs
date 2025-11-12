@@ -4,6 +4,8 @@ namespace OCR.Repositories
 {
     public interface IRecognizeTextRepository
     {
-        Task<RecognizedText> GetByIdAsync(Guid id);
+        Task<Recognize> GetByIdAsync(Guid id);
+        Task<RecognizeText> GetByIdTextAsync(Guid id);
+        Task<List<RecognizeText>> GetAllAsync();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OCR.Models.Domain;
+using OCR.Models.DTO;
 using OCR.Repositories;
 using OCR.Services;
 
@@ -8,19 +9,19 @@ namespace OCR.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TextController : ControllerBase
+    public class RecognizeController : ControllerBase
     {
-        public TextController(ITextRepository textRepository)
+        public RecognizeController(IRecognizeRepository recognizeRepository)
         {
-            TextRepository = textRepository;
+            RecognizeRepository = recognizeRepository;
         }
 
-        public ITextRepository TextRepository { get; }
+        public IRecognizeRepository RecognizeRepository { get; }
         [HttpPost("{id}")]
         public async Task<IActionResult> Recognize(Guid id, [FromServices] AzureOcrService ocrService)
         {
             // Знайти документ у базі
-            var document = await TextRepository.GetByIdAsync(id);
+            var document = await RecognizeRepository.GetByIdAsync(id);
             if (document == null)
                 return NotFound("Document not found.");
 
@@ -35,14 +36,14 @@ namespace OCR.Controllers
             string recognizedText = await ocrService.ReadDocumentAsync(filePath);
 
             // Зберегти результат у базі
-            var recognized = new RecognizedText
+            var recognized = new Models.Domain.Recognize
             {
                 Id = Guid.NewGuid(),
                 DocumentId = document.Id,
                 Text = recognizedText
             };
 
-            await TextRepository.SaveRecognizedTextAsync(recognized);
+            await RecognizeRepository.SaveRecognizedTextAsync(recognized);
 
             // Повернути результат клієнту
             return Ok(new
@@ -50,6 +51,41 @@ namespace OCR.Controllers
                 DocumentId = document.Id,
                 Text = recognizedText
             });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var text = await RecognizeRepository.GetByIdTextAsync(id);
+
+            var textDto = new RecognizeDto
+            {
+                Id = text.Id,
+                Text = text.Text
+            };
+
+            return Ok(textDto);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var TextDomain = await RecognizeRepository.GetAllAsync();
+
+            var textDto = new List<RecognizeDto>();
+
+            foreach (var textDomain in TextDomain)
+            {
+                textDto.Add(new RecognizeDto
+                {
+                    Id = textDomain.Id,
+                    Text = textDomain.Text
+                });
+            }
+                return Ok(textDto);
+          
+            
+            
         }
 
     }

@@ -26,6 +26,11 @@ namespace OCR.Repositories
             return await document.ToListAsync();
         }
 
+        public async Task<Document> GetByIdAsync(Guid id)
+        {
+            return await dbContext.Documents.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
         public async Task<Document> Upload(Document document)
         {
             var localFilePath = Path.Combine(webHostEnvironment.ContentRootPath, "Documents",

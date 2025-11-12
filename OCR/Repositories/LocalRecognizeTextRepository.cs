@@ -13,8 +13,19 @@ namespace OCR.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<RecognizedText> GetByIdAsync (Guid id){
+        public async Task<List<RecognizeText>> GetAllAsync()
+        {
+            var text = dbContext.RecognizedDocuments.AsQueryable();
+            return await text.ToListAsync();
+        }
+
+        public async Task<Recognize> GetByIdAsync (Guid id){
             return await dbContext.RecognizedTexts.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<RecognizeText> GetByIdTextAsync(Guid id)
+        {
+            return await dbContext.RecognizedDocuments.FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 }

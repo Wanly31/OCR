@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using OCR.Models.DTO;
 using OCR.Repositories;
 using OCR.Services;
 
@@ -9,7 +11,7 @@ namespace OCR.Controllers
     [ApiController]
     public class RecognizeTextController : ControllerBase
     {
-        public RecognizeTextController(IRecognizeTextRepository recognizeTextRepository) 
+        public RecognizeTextController(IRecognizeTextRepository recognizeTextRepository)
         {
             RecognizeTextRepository = recognizeTextRepository;
         }
@@ -31,5 +33,49 @@ namespace OCR.Controllers
 
             return Ok(recogText);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var docDto = await RecognizeTextRepository.GetByIdTextAsync(id);
+
+            var textDto = new RecognizeTextDto
+            {
+                Id = docDto.Id,
+                FirstName = docDto.FirstName,
+                LastName = docDto.LastName,
+                Medicine = docDto.Medicine,
+                Treatment = docDto.Treatment,
+                DateDocument = docDto.DateDocument,
+                CreatedAt = docDto.CreatedAt
+
+            };
+
+            return Ok(textDto);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var TextDomain = await RecognizeTextRepository.GetAllAsync();
+
+            var textDto = new List<RecognizeTextDto>();
+
+            foreach (var textDomain in TextDomain)
+            {
+                textDto.Add(new RecognizeTextDto
+                {
+                    Id = textDomain.Id,
+                    FirstName = textDomain.FirstName,
+                    LastName = textDomain.LastName,
+                    Medicine = textDomain.Medicine,
+                    Treatment = textDomain.Treatment,
+                    DateDocument = textDomain.DateDocument,
+                    CreatedAt = textDomain.CreatedAt
+                });
+             }
+            return Ok(textDto);
+        }
     }
+
 }
