@@ -46,6 +46,10 @@ namespace OCR.Controllers
         public async Task<IActionResult> GetAll()
         {
             var DocumentsDomain = await DocumentRepository.GetAllAsync();
+            if (DocumentsDomain == null || DocumentsDomain.Count == 0)
+            {
+                throw new Exception("No documents found");
+            }
 
             var documentDto = new List<DocumentDto>();
 
@@ -68,6 +72,14 @@ namespace OCR.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var document = await DocumentRepository.GetByIdAsync(id);
+            
+            if (document == null)
+            {
+                if (document == null)
+                {
+                    throw new Exception($"Document with id: {id} not found");
+                }
+            }
 
             var documentDto = new DocumentDto
             {

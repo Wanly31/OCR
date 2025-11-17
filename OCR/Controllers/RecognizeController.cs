@@ -23,14 +23,14 @@ namespace OCR.Controllers
             // Знайти документ у базі
             var document = await RecognizeRepository.GetByIdAsync(id);
             if (document == null)
-                return NotFound("Document not found.");
+                throw new Exception($"Document with id {id} not found.");
 
             // Побудувати абсолютний шлях до файлу у папці Documents
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Documents", $"{document.FileName}{document.FileExtension}");
 
             // Перевірити, чи файл існує
             if (!System.IO.File.Exists(filePath))
-                return NotFound($"File not found at path: {filePath}");
+                throw new Exception($"File {filePath} not found.");
 
             // Викликати Azure OCR сервіс для розпізнавання
             string recognizedText = await ocrService.ReadDocumentAsync(filePath);
@@ -58,6 +58,9 @@ namespace OCR.Controllers
         {
             var text = await RecognizeRepository.GetByIdTextAsync(id);
 
+            if(text == null)
+                throw new Exception($"Text with id {id} not found.");
+
             var textDto = new RecognizeDto
             {
                 Id = text.Id,
@@ -71,6 +74,9 @@ namespace OCR.Controllers
         public async Task<IActionResult> GetAll()
         {
             var TextDomain = await RecognizeRepository.GetAllAsync();
+
+            if (TextDomain == null || !TextDomain.Any())
+                throw new Exception("No recognized texts found.");
 
             var textDto = new List<RecognizeDto>();
 

@@ -24,7 +24,7 @@ namespace OCR.Controllers
             var text = await RecognizeTextRepository.GetByIdAsync(id);
             if (text == null)
             {
-                return NotFound("Recognized text not found.");
+                throw new Exception($"Text whith id: {id} not found");
             }
 
             var textResult = text.Text;
@@ -38,6 +38,10 @@ namespace OCR.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var docDto = await RecognizeTextRepository.GetByIdTextAsync(id);
+            if (docDto == null)
+            {
+                throw new Exception($"Text whith id: {id} not found");
+            }
 
             var textDto = new RecognizeTextDto
             {
@@ -58,6 +62,10 @@ namespace OCR.Controllers
         public async Task<IActionResult> GetAll()
         {
             var TextDomain = await RecognizeTextRepository.GetAllAsync();
+            if (TextDomain == null || !TextDomain.Any())
+            {
+                throw new Exception("No texts found");
+            }
 
             var textDto = new List<RecognizeTextDto>();
 
