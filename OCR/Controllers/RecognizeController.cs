@@ -36,7 +36,7 @@ namespace OCR.Controllers
             string recognizedText = await ocrService.ReadDocumentAsync(filePath);
 
             // Зберегти результат у базі
-            var recognized = new Models.Domain.Recognize
+            var recognized = new Recognize
             {
                 Id = Guid.NewGuid(),
                 DocumentId = document.Id,

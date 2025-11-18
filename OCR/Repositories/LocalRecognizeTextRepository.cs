@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OCR.Data;
 using OCR.Models.Domain;
+using OCR.Models.DTO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace OCR.Repositories
 {
@@ -27,5 +29,13 @@ namespace OCR.Repositories
         {
             return await dbContext.RecognizedDocuments.FirstOrDefaultAsync(x => x.Id == id);
         }
+
+        public async Task SaveRecognizedTextAsync(RecognizeText text)
+        {
+            await dbContext.RecognizedDocuments.AddAsync(text);
+            await dbContext.SaveChangesAsync();
+        }
+
+        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using OCR.Models.Domain;
+using OCR.Models.DTO;
 
 namespace OCR.Repositories
 {
@@ -7,5 +8,7 @@ namespace OCR.Repositories
         Task<Recognize> GetByIdAsync(Guid id);
         Task<RecognizeText> GetByIdTextAsync(Guid id);
         Task<List<RecognizeText>> GetAllAsync();
+
+        Task SaveRecognizedTextAsync(RecognizeText text);
     }
 }

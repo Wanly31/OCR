@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using OCR.Models.Domain;
 using OCR.Models.DTO;
 using OCR.Repositories;
 using OCR.Services;
@@ -13,8 +14,9 @@ namespace OCR.Controllers
     {
         public readonly ILogger<RecognizeTextController> logger;
 
-        public RecognizeTextController(IRecognizeTextRepository recognizeTextRepository, RecognizeTextService recognizeTextService)
+        public RecognizeTextController(IRecognizeTextRepository recognizeTextRepository, RecognizeTextService recognizeTextService, ILogger<RecognizeTextController> logger)
         {
+            this.logger = logger;
             RecognizeTextRepository = recognizeTextRepository;
             RecognizeTextService = recognizeTextService;
         }
@@ -40,6 +42,20 @@ namespace OCR.Controllers
 
                 var recogText = await RecognizeTextService.RecognizeText(text.Text);
 
+                var recognizeTextDomain = new RecognizeText
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = recogText.FirstName,
+                    LastName = recogText.LastName,
+                    Medicine = recogText.Medicine,
+                    Treatment = recogText.Treatment,
+                    DateDocument = recogText.DateDocument,
+                    CreatedAt = DateTime.UtcNow,
+                    RecognizedTextId = id
+                };
+
+                await RecognizeTextRepository.SaveRecognizedTextAsync(recognizeTextDomain);
+
                 return Ok(new
                 {
                     Id = id,
@@ -50,6 +66,8 @@ namespace OCR.Controllers
                     Treatment = recogText.Treatment,
                     ProcessedAt = DateTime.UtcNow
                 });
+
+
             }
             catch (Exception ex)
             {
