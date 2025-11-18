@@ -11,27 +11,49 @@ namespace OCR.Controllers
     [ApiController]
     public class RecognizeTextController : ControllerBase
     {
-        public RecognizeTextController(IRecognizeTextRepository recognizeTextRepository)
+        public readonly ILogger<RecognizeTextController> logger;
+
+        public RecognizeTextController(IRecognizeTextRepository recognizeTextRepository, RecognizeTextService recognizeTextService)
         {
             RecognizeTextRepository = recognizeTextRepository;
+            RecognizeTextService = recognizeTextService;
         }
 
         public IRecognizeTextRepository RecognizeTextRepository { get; }
+        public RecognizeTextService RecognizeTextService { get; }
 
         [HttpPost("{id}")]
-        public async Task<IActionResult> RecognizeTextAsync(Guid id, [FromServices] RecognizeTextService recognizeText)
+        public async Task<IActionResult> RecognizeTextAsync(Guid id)
         {
-            var text = await RecognizeTextRepository.GetByIdAsync(id);
-            if (text == null)
+            try
             {
-                throw new Exception($"Text whith id: {id} not found");
+                var text = await RecognizeTextRepository.GetByIdAsync(id);
+                if (text == null)
+                {
+                    return NotFound($"Text with id: {id} not found");
+                }
+
+                if (string.IsNullOrWhiteSpace(text.Text))
+                {
+                    return BadRequest("Text content is empty");
+                }
+
+                var recogText = await RecognizeTextService.RecognizeText(text.Text);
+
+                return Ok(new
+                {
+                    Id = id,
+                    ExtractedDate = recogText.DateDocument?.ToString("yyyy-MM-dd"),
+                    FirstName = recogText.FirstName,
+                    LastName = recogText.LastName,
+                    ProcessedAt = DateTime.UtcNow
+                });
             }
-
-            var textResult = text.Text;
-
-            string recogText = await recognizeText.RecognizeText(textResult);
-
-            return Ok(recogText);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error recognizing text for id: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpGet("{id}")]

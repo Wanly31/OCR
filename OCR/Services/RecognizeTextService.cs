@@ -1,29 +1,111 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
+﻿using Azure;
+using Azure.AI.TextAnalytics;
+using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Recognizers.Text;
+using Microsoft.Recognizers.Text.DateTime;
+using Microsoft.Rest.Azure;
+using OCR.Models.Domain;
 
 namespace OCR.Services
 {
     public class RecognizeTextService
     {
-        public Task<String> RecognizeText(string text)
+        private readonly ILogger<RecognizeTextService> _logger;
+        private readonly TextAnalyticsClient textAnalyticsClient; 
+
+        public RecognizeTextService(ILogger<RecognizeTextService> logger, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
-            Regex data = new Regex("\\b\\d{2}.\\d{2}.\\d{4}\\b"); // пошук дати XX-XX-XXXX
-            var Data = data.Matches(text).FirstOrDefault();
+            _logger = logger;
 
-            Regex name = new Regex(@"\b([A-Z][a-z]+)\s(?:([A-Z]\.?\s)?([A-Z][a-z]+(?:-[A-Z][a-z]+)?))\b"); // пошук імені 
-            var Name = name.Matches(text).FirstOrDefault();
+            var endpoint = configuration["AzureLanguage:Endpoint"]!;
+            var key = configuration["AzureLanguage:Key"]!;
 
-            Regex medicine = new Regex(""); // пошук ліків
-            var Medicine = medicine.Matches(text).FirstOrDefault();
-
-            Regex treatment = new Regex(""); // пошук заборонених ліків
-            var Treatment = treatment.Matches(text).FirstOrDefault();
-
-            return Task.FromResult($"{Data?.Value} {Name?.Value}");
-
+            textAnalyticsClient = new TextAnalyticsClient(
+                new Uri(endpoint),
+                new AzureKeyCredential(key));
         }
+
+        public async Task<RecognizeText> RecognizeText(string text)
+        {
+            var result = new RecognizeText();
+
+            var tasks = new List<Task>
+            {
+                ExtractDateAsync(text, result),
+                ExtractNameAsync(text, result)
+            };
+
+            await Task.WhenAll(tasks);
+            return result;
+        }
+
+        //Використовуємо Microsoft Recognizers Text дати
+        private async Task ExtractDateAsync(string text, RecognizeText result)
+        {
+            try
+            {
+                var dateResults = DateTimeRecognizer.RecognizeDateTime(text, Culture.English);
+
+                if (dateResults.Any())
+                {
+                    var dateResult = dateResults.FirstOrDefault();
+                    var resolution = dateResult?.Resolution;
+
+                    if (resolution?.ContainsKey("values") == true)
+                    {
+                        var values = resolution["values"] as List<Dictionary<string, string>>;
+                        var dateValue = values?.FirstOrDefault()?["value"];
+
+                        if (!string.IsNullOrEmpty(dateValue) && DateTime.TryParse(dateValue, out var parsedDate))
+                        {
+                            result.DateDocument = DateOnly.FromDateTime(parsedDate);
+                            _logger.LogInformation($"Successfully extracted date: {result.DateDocument}");
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("No date found in the text");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Date extraction failed: {ex.Message}");
+            }
+        }
+
+
+        //Використовуємо Azure Text Analytics для витягання імен
+        private async Task ExtractNameAsync(string text, RecognizeText result)
+        {
+            try
+            {
+                var response = await textAnalyticsClient.RecognizeEntitiesAsync(text);
+                var personEntities = response.Value.Where(e => e.Category == EntityCategory.Person).ToList();
+
+                if (personEntities.Any())
+                {
+                    var fullName = personEntities.First().Text;
+                    var nameParts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    result.FirstName = nameParts.FirstOrDefault();
+                    result.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : null;
+
+                    _logger.LogInformation($"Successfully extracted name: {result.FirstName} {result.LastName}");
+                }
+                else
+                {
+                    _logger.LogInformation("No person entities found in the text");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Name extraction failed: {ex.Message}");
+            }
+        }
+
+
 
     }
 }
