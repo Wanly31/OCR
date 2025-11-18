@@ -46,6 +46,8 @@ namespace OCR.Controllers
                     ExtractedDate = recogText.DateDocument?.ToString("yyyy-MM-dd"),
                     FirstName = recogText.FirstName,
                     LastName = recogText.LastName,
+                    Medicine = recogText.Medicine,
+                    Treatment = recogText.Treatment,
                     ProcessedAt = DateTime.UtcNow
                 });
             }
