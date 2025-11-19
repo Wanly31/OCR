@@ -8,5 +8,6 @@ namespace OCR.Repositories
         Task<List<Document>> GetAllAsync();
         Task<Document> GetByIdAsync(Guid id);
         Task<Document> DeleteAsync(Guid id);
+        Task<Document> UpdateAsync(Guid id, Document documentDomainModel);
     }
 }

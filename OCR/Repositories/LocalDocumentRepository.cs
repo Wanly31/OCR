@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OCR.Data;
 using OCR.Models.Domain;
@@ -42,6 +43,20 @@ namespace OCR.Repositories
         public async Task<Document> GetByIdAsync(Guid id)
         {
             return await dbContext.Documents.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+      
+        public async Task<Document> UpdateAsync(Guid id, Document documentDomainModel)
+        {
+            var existingDocument = await dbContext.Documents.FirstOrDefaultAsync(x => x.Id == id);
+            if (existingDocument == null)
+            {
+                return null;
+            }
+            existingDocument.FileDescription = documentDomainModel.FileDescription;
+            existingDocument.FileName = documentDomainModel.FileName;
+            await dbContext.SaveChangesAsync();
+            return existingDocument;
         }
 
         public async Task<Document> Upload(Document document)

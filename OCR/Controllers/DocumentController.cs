@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 using OCR.Models.Domain;
 using OCR.Models.DTO;
 using OCR.Repositories;
@@ -75,10 +76,8 @@ namespace OCR.Controllers
             
             if (document == null)
             {
-                if (document == null)
-                {
-                    throw new Exception($"Document with id: {id} not found");
-                }
+                    return NotFound($"Document with id: {id} not found");
+             
             }
 
             var documentDto = new DocumentDto
@@ -87,6 +86,32 @@ namespace OCR.Controllers
                 FileName = document.FileName,
                 FileDescription = document.FileDescription,
                 FileSizeInBytes = document.FileSizeInBytes
+            };
+
+            return Ok(documentDto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDocumentRequestDto updateDocumentRequestDto)
+        {
+            var DocumentDomainModel = new Document
+            {
+                FileName = updateDocumentRequestDto.FileName,
+                FileDescription = updateDocumentRequestDto.FileDescription
+            };
+
+            DocumentDomainModel = await DocumentRepository.UpdateAsync(id, DocumentDomainModel);
+
+            if (DocumentDomainModel == null)
+            {
+                return NotFound($"Document with id: {id} not found");
+            }
+
+            var documentDto = new DocumentDto
+            {
+                FileName = DocumentDomainModel.FileName,
+                FileDescription = DocumentDomainModel.FileDescription,
+                FileSizeInBytes = DocumentDomainModel.FileSizeInBytes
             };
 
             return Ok(documentDto);

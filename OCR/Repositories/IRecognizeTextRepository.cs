@@ -11,5 +11,6 @@ namespace OCR.Repositories
 
         Task SaveRecognizedTextAsync(RecognizeText text);
         Task<RecognizeText> DeleteAsync(Guid id);
+        Task<RecognizeText> UpdateAsync(Guid id, RecognizeText textDomainModel);
     }
 }

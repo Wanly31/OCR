@@ -51,5 +51,20 @@ namespace OCR.Repositories
             await dbContext.RecognizedTexts.AddAsync(text);
             await dbContext.SaveChangesAsync();
         }
+
+        public async Task<Recognize> UpdateAsync(Guid id, Recognize textDomainModel)
+        {
+            var existingText = await dbContext.RecognizedTexts.FirstOrDefaultAsync(x => x.Id == id);
+
+            if(existingText == null)
+            {
+                return null;
+            }
+
+            existingText.Text = textDomainModel.Text;
+
+            await dbContext.SaveChangesAsync();
+            return existingText;
+        }
     }
 }

@@ -95,6 +95,27 @@ namespace OCR.Controllers
             return Ok(textDto);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRecognizeRequestDto updateRecognizeRequestDto) {
+            var TextDomainModel = new Recognize
+            {
+                Text = updateRecognizeRequestDto.Text
+            };
+
+            TextDomainModel = await RecognizeRepository.UpdateAsync(id, TextDomainModel);
+
+            if(TextDomainModel == null)
+            {
+                return NotFound();
+            }
+
+            var textDto = new RecognizeDto
+            {
+                Text = TextDomainModel.Text
+            };
+            return Ok(textDto);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
