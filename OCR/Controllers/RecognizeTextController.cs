@@ -75,6 +75,33 @@ namespace OCR.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+       
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var TextDomain = await RecognizeTextRepository.GetAllAsync();
+            if (TextDomain == null || !TextDomain.Any())
+            {
+                throw new Exception("No texts found");
+            }
+
+            var textDto = new List<RecognizeTextDto>();
+
+            foreach (var textDomain in TextDomain)
+            {
+                textDto.Add(new RecognizeTextDto
+                {
+                    Id = textDomain.Id,
+                    FirstName = textDomain.FirstName,
+                    LastName = textDomain.LastName,
+                    Medicine = textDomain.Medicine,
+                    Treatment = textDomain.Treatment,
+                    DateDocument = textDomain.DateDocument,
+                    CreatedAt = textDomain.CreatedAt
+                });
+            }
+            return Ok(textDto);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
@@ -100,32 +127,17 @@ namespace OCR.Controllers
             return Ok(textDto);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var TextDomain = await RecognizeTextRepository.GetAllAsync();
-            if (TextDomain == null || !TextDomain.Any())
+            var textModel = await RecognizeTextRepository.DeleteAsync(id);
+            if (textModel == null)
             {
-                throw new Exception("No texts found");
+                throw new Exception($"Text whith {id} not found");
             }
 
-            var textDto = new List<RecognizeTextDto>();
-
-            foreach (var textDomain in TextDomain)
-            {
-                textDto.Add(new RecognizeTextDto
-                {
-                    Id = textDomain.Id,
-                    FirstName = textDomain.FirstName,
-                    LastName = textDomain.LastName,
-                    Medicine = textDomain.Medicine,
-                    Treatment = textDomain.Treatment,
-                    DateDocument = textDomain.DateDocument,
-                    CreatedAt = textDomain.CreatedAt
-                });
-             }
-            return Ok(textDto);
+            return Ok("Delete text succesfully");
         }
-    }
 
+    }
 }

@@ -10,5 +10,6 @@ namespace OCR.Repositories
         Task<List<RecognizeText>> GetAllAsync();
 
         Task SaveRecognizedTextAsync(RecognizeText text);
+        Task<RecognizeText> DeleteAsync(Guid id);
     }
 }

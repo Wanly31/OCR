@@ -17,6 +17,7 @@ namespace OCR.Controllers
         }
 
         public IRecognizeRepository RecognizeRepository { get; }
+        
         [HttpPost("{id}")]
         public async Task<IActionResult> Recognize(Guid id, [FromServices] AzureOcrService ocrService)
         {
@@ -53,23 +54,6 @@ namespace OCR.Controllers
             });
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
-        {
-            var text = await RecognizeRepository.GetByIdTextAsync(id);
-
-            if(text == null)
-                throw new Exception($"Text with id {id} not found.");
-
-            var textDto = new RecognizeDto
-            {
-                Id = text.Id,
-                Text = text.Text
-            };
-
-            return Ok(textDto);
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -88,10 +72,40 @@ namespace OCR.Controllers
                     Text = textDomain.Text
                 });
             }
-                return Ok(textDto);
-          
-            
-            
+            return Ok(textDto);
+
+
+
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var text = await RecognizeRepository.GetByIdTextAsync(id);
+
+            if(text == null)
+                throw new Exception($"Text with id {id} not found.");
+
+            var textDto = new RecognizeDto
+            {
+                Id = text.Id,
+                Text = text.Text
+            };
+
+            return Ok(textDto);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var recognizeModel = await RecognizeRepository.DeleteAsync(id);
+
+            if(recognizeModel == null)
+            {
+                throw new Exception($"Recognized text with id: {id} not found");
+            }
+
+            return Ok("Recognized text deleted successfully");
         }
 
     }

@@ -15,6 +15,20 @@ namespace OCR.Repositories
             this.dbContext = dbContext;
         }
 
+        public async Task<Recognize> DeleteAsync(Guid id)
+        {
+            var existingRecognize = await dbContext.RecognizedTexts.FirstOrDefaultAsync(x => x.Id == id);
+            if(existingRecognize == null)
+            {
+                return null;
+            }
+
+            dbContext.RecognizedTexts.Remove(existingRecognize);
+            await dbContext.SaveChangesAsync();
+            return existingRecognize;
+
+        }
+
         public async Task<List<Recognize>> GetAllAsync()
         {
             var text = dbContext.RecognizedTexts.AsQueryable();

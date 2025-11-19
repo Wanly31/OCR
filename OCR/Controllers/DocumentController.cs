@@ -92,6 +92,19 @@ namespace OCR.Controllers
             return Ok(documentDto);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var dokumentModel = await DocumentRepository.DeleteAsync(id);
+
+            if (dokumentModel == null)
+            {
+                throw new Exception($"Document with id: {id} not found");
+            }
+
+            return Ok( "Document deleted successfully");
+        }
+
 
         private void ValidateFileUpload(DocumentUploadRequestDto request)
         {

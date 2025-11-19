@@ -20,6 +20,19 @@ namespace OCR.Repositories
             this.dbContext = dbContext;
         }
 
+        public async Task<Document> DeleteAsync(Guid id)
+        {
+            var existingDocument = await dbContext.Documents.FirstOrDefaultAsync(x => x.Id == id);
+            if(existingDocument == null)
+            {
+                return null;
+            }
+
+            dbContext.Documents.Remove(existingDocument);
+            await dbContext.SaveChangesAsync();
+            return existingDocument;
+        }
+
         public async Task<List<Document>> GetAllAsync()
         {
             var document = dbContext.Documents.AsQueryable();
