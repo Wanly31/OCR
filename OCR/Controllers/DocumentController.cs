@@ -49,7 +49,7 @@ namespace OCR.Controllers
             var DocumentsDomain = await DocumentRepository.GetAllAsync();
             if (DocumentsDomain == null || DocumentsDomain.Count == 0)
             {
-                throw new Exception("No documents found");
+                return NotFound("No documents found");
             }
 
             var documentDto = new List<DocumentDto>();

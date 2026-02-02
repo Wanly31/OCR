@@ -145,7 +145,7 @@ namespace OCR.Services
                                 if (entity.Category == HealthcareEntityCategory.TreatmentName)
                                 {
                                     treatment.Add(entity.Text);
-                                    _logger.LogInformation($"Successfully extracted treatment: {entity.Text}");
+                                    _logger.LogInformation(message: $"""Successfully extracted treatment: {entity.Text}""");
                                 }
                             }
                         }

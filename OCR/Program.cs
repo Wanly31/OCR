@@ -90,4 +90,4 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
