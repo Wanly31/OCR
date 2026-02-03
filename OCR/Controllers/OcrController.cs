@@ -17,13 +17,23 @@ namespace OCR.Controllers
     {
 
         private readonly RecognizeTextService _recognizeTextService;
+        private readonly AzureOcrService ocrService;
+        private readonly ILogger _logger;
 
-        public OcrController(IDocumentRepository documentRepository, IRecognizeRepository recognizeRepository, IRecognizeTextRepository recognizeTextRepository, RecognizeTextService recognizeTextService)
+        public OcrController(
+            IDocumentRepository documentRepository, 
+            IRecognizeRepository recognizeRepository, 
+            IRecognizeTextRepository recognizeTextRepository, 
+            RecognizeTextService recognizeTextService,
+            AzureOcrService ocrService,
+            ILogger<OcrController> logger)
         {
             DocumentRepository = documentRepository;
             RecognizeRepository = recognizeRepository;
             RecognizeTextRepository = recognizeTextRepository;
             _recognizeTextService = recognizeTextService;
+            this.ocrService = ocrService;
+            _logger = logger;
 
         }
 
@@ -32,7 +42,7 @@ namespace OCR.Controllers
         public IRecognizeTextRepository RecognizeTextRepository { get; }
 
         [HttpPost("UploadAndRecognize")]
-        public async Task<IActionResult> Upload([FromForm] DocumentUploadRequestDto requestDto, [FromServices] AzureOcrService ocrService)
+        public async Task<IActionResult> Upload([FromForm] DocumentUploadRequestDto requestDto)
         {
             ValidateFileUpload(requestDto);
 
@@ -47,14 +57,33 @@ namespace OCR.Controllers
                     FileName = requestDto.FileName
                 };
 
-                await DocumentRepository.Upload(documentDomainModel);
+                _logger.LogInformation("Starting file upload");
 
-                //logs
+                try
+                {
+                    await DocumentRepository.Upload(documentDomainModel);
+                } 
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading file");
+                    return BadRequest("Error uploading file");
+                }
 
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Documents", $"{documentDomainModel.FileName}{documentDomainModel.FileExtension}");
 
-                //try catch and logs?
-                string recognizedText = await ocrService.ReadDocumentAsync(filePath);
+                _logger.LogInformation("File uploaded successfully, starting OCR processing");
+                
+                string recognizedText;
+                try
+                {
+                    recognizedText = await ocrService.ReadDocumentAsync(filePath);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error during OCR processing");
+                    return BadRequest($"Error during OCR processing: {ex.Message}");
+                }
+
                 var recognized = new Recognize
                 {
                     Id = Guid.NewGuid(),
@@ -62,14 +91,36 @@ namespace OCR.Controllers
                     Text = recognizedText
                 };
 
-                await RecognizeRepository.SaveRecognizedTextAsync(recognized);
+                _logger.LogInformation("Saving recognized text to repository");
+                try
+                {
+                    await RecognizeRepository.SaveRecognizedTextAsync(recognized);
+                }
+                catch 
+                {
+                    _logger.LogError("Error saving recognized text to repository");
+                    return BadRequest("Error saving recognized text");
+                }
+
 
                 if (string.IsNullOrWhiteSpace(recognized.Text))
                 {
+                    _logger.LogWarning("Recognized text is empty");
                     return BadRequest("Text content is empty");
                 }
 
-                var recogText = await _recognizeTextService.RecognizeText(recognized.Text);
+                _logger.LogInformation("Extracting structured data from recognized text");
+                RecognizeText recogText;
+                try
+                {
+                    recogText = await _recognizeTextService.RecognizeText(recognized.Text);
+                }
+                catch
+                {
+                    _logger.LogError("Error extracting structured data from recognized text");
+                    return BadRequest("Error extracting structured data from recognized text");
+                }
+
 
                 var recognizeTextDomain = new RecognizeText
                 {
@@ -83,7 +134,17 @@ namespace OCR.Controllers
                     RecognizedTextId = recognized.Id
                 };
 
-                await RecognizeTextRepository.SaveRecognizedTextAsync(recognizeTextDomain);
+                _logger.LogInformation("Saving extracted structured data to repository");
+                try
+                {
+                    await RecognizeTextRepository.SaveRecognizedTextAsync(recognizeTextDomain);
+
+                }
+                catch
+                {
+                    _logger.LogError("Error saving extracted structured data to repository");
+                    return BadRequest("Error saving extracted structured data");
+                }
 
                 return Ok(new
                 {
@@ -108,7 +169,7 @@ namespace OCR.Controllers
 
             if (!allowedExtensions.Contains(Path.GetExtension(request.File.FileName)))
             {
-                ModelState.AddModelError("File", "Only .jpg, .jpeg, .pdf");
+                ModelState.AddModelError("File", "Only .jpg, .jpeg, .pdf, .png");
             }
             if (request.File.Length > 10385760)
             {

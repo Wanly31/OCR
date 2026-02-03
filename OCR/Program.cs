@@ -15,9 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 //add Logger
 var logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
     .WriteTo.Console()
-    .WriteTo.File("Logs/Log.txt", rollingInterval: RollingInterval.Minute)
-    .MinimumLevel.Warning()
+    .WriteTo.File("Logs/Log.txt",
+        rollingInterval: RollingInterval.Minute,
+        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
     .CreateLogger();
 
 builder.Logging.ClearProviders();
