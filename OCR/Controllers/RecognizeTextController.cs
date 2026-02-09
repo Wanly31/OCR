@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Recognizers.Text;
 using OCR.Models.Domain;
 using OCR.Models.DTO;
 using OCR.Repositories;
@@ -47,8 +48,12 @@ namespace OCR.Controllers
                     Id = Guid.NewGuid(),
                     FirstName = recogText.FirstName,
                     LastName = recogText.LastName,
+                    BirthDate = recogText.BirthDate,
+                    Examination = recogText.Examination,
                     Medicine = recogText.Medicine,
                     Treatment = recogText.Treatment,
+                    ContraindicatedMedicine = recogText.ContraindicatedMedicine,
+                    ContraindicatedReason = recogText.ContraindicatedReason,
                     DateDocument = recogText.DateDocument,
                     CreatedAt = DateTime.UtcNow,
                     RecognizedTextId = id
@@ -58,12 +63,17 @@ namespace OCR.Controllers
 
                 return Ok(new
                 {
-                    Id = id,
-                    ExtractedDate = recogText.DateDocument?.ToString("yyyy-MM-dd"),
+                    Id = recogText.Id,
                     FirstName = recogText.FirstName,
                     LastName = recogText.LastName,
+                    BirthDate = recogText.BirthDate,
+                    Examination = recogText.Examination,
                     Medicine = recogText.Medicine,
                     Treatment = recogText.Treatment,
+                    ContraindicatedMedicine = recogText.ContraindicatedMedicine,
+                    ContraindicatedReason = recogText.ContraindicatedReason,
+                    DateDocument = recogText.DateDocument,
+                    CreatedAt = DateTime.UtcNow,
                     ProcessedAt = DateTime.UtcNow
                 });
 

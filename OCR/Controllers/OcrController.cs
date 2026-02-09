@@ -127,8 +127,12 @@ namespace OCR.Controllers
                     Id = Guid.NewGuid(),
                     FirstName = recogText.FirstName,
                     LastName = recogText.LastName,
+                    BirthDate = recogText.BirthDate,
+                    Examination = recogText.Examination,
                     Medicine = recogText.Medicine,
                     Treatment = recogText.Treatment,
+                    ContraindicatedMedicine = recogText.ContraindicatedMedicine,
+                    ContraindicatedReason = recogText.ContraindicatedReason,
                     DateDocument = recogText.DateDocument,
                     CreatedAt = DateTime.UtcNow,
                     RecognizedTextId = recognized.Id
@@ -149,12 +153,16 @@ namespace OCR.Controllers
                 return Ok(new
                 {
                     Id = recognized.Id,
-                    ExtractedDate = recogText.DateDocument?.ToString("yyyy-MM-dd"),
                     FirstName = recogText.FirstName,
                     LastName = recogText.LastName,
+                    BirthDate = recogText.BirthDate,
+                    Examination = recogText.Examination,
                     Medicine = recogText.Medicine,
                     Treatment = recogText.Treatment,
-                    ProcessedAt = DateTime.UtcNow
+                    ContraindicatedMedicine = recogText.ContraindicatedMedicine,
+                    ContraindicatedReason = recogText.ContraindicatedReason,
+                    DateDocument = recogText.DateDocument,
+                    CreatedAt = DateTime.UtcNow,
                 });
             }
 

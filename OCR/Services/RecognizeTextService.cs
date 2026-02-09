@@ -1,28 +1,24 @@
 ﻿using Azure;
 using Azure.AI.TextAnalytics;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Recognizers.Text;
-using Microsoft.Recognizers.Text.DateTime;
-using Microsoft.Rest.Azure;
 using OCR.Models.Domain;
-using System.Reflection.Metadata;
+using System.Globalization;
 
 namespace OCR.Services
 {
     public class RecognizeTextService
     {
         private readonly ILogger<RecognizeTextService> _logger;
-        private readonly TextAnalyticsClient textAnalyticsClient; 
+        private readonly TextAnalyticsClient _textAnalyticsClient;
 
-        public RecognizeTextService(ILogger<RecognizeTextService> logger, Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public RecognizeTextService(ILogger<RecognizeTextService> logger, IConfiguration configuration)
         {
             _logger = logger;
 
             var endpoint = configuration["AzureLanguage:Endpoint"]!;
             var key = configuration["AzureLanguage:Key"]!;
 
-            textAnalyticsClient = new TextAnalyticsClient(
+            _textAnalyticsClient = new TextAnalyticsClient(
                 new Uri(endpoint),
                 new AzureKeyCredential(key));
         }
@@ -31,152 +27,120 @@ namespace OCR.Services
         {
             var result = new RecognizeText();
 
-            var tasks = new List<Task>
-            {
-                ExtractDateAsync(text, result),
-                ExtractNameAndMedicineAsync(text,  result)
-            };
+            var entityTask = ExtractEntitiesAsync(text, result);
+            var healthcareTask = ExtractHealthcareEntitiesAsync(text, result);
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(entityTask, healthcareTask);
+
             return result;
         }
 
-
-
-        //Використовуємо Microsoft Recognizers Text дати
-        private async Task ExtractDateAsync(string text, RecognizeText result)
+        private async Task ExtractEntitiesAsync(string text, RecognizeText result)
         {
             try
             {
-                var dateResults = DateTimeRecognizer.RecognizeDateTime(text, Culture.English);
+                var response = await _textAnalyticsClient.RecognizePiiEntitiesAsync(text);
 
-                if (dateResults.Any())
+                var personEntity = response.Value.FirstOrDefault(e => e.Category == PiiEntityCategory.Person);
+                if (!string.IsNullOrEmpty(personEntity.Text))
                 {
-                    var dateResult = dateResults.FirstOrDefault();
-                    var resolution = dateResult?.Resolution;
+                    var nameParts = personEntity.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    result.FirstName = nameParts.FirstOrDefault();
+                    result.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : null;
 
-                    if (resolution?.ContainsKey("values") == true)
+                    _logger.LogInformation($"Extracted name: {result.FirstName} {result.LastName}");
+                }
+                else
+                {
+                    _logger.LogInformation("No person entities found.");
+                }
+
+                var dobEntity = response.Value.FirstOrDefault(e =>
+                    e.Category == PiiEntityCategory.Date &&
+                    e.SubCategory == "DateOfBirth");
+
+                if (!string.IsNullOrEmpty(dobEntity.Text))
+                {
+                    if (DateTime.TryParseExact(dobEntity.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
                     {
-                        var values = resolution["values"] as List<Dictionary<string, string>>;
-                        var dateValue = values?.FirstOrDefault()?["value"];
-
-                        if (!string.IsNullOrEmpty(dateValue) && DateTime.TryParse(dateValue, out var parsedDate))
-                        {
-                            result.DateDocument = DateOnly.FromDateTime(parsedDate);
-                            _logger.LogInformation($"Successfully extracted date: {result.DateDocument}");
-                        }
+                        result.BirthDate = DateOnly.FromDateTime(parsedDate);
+                        _logger.LogInformation($"Extracted birth date: {result.BirthDate}");
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Failed to parse birth date: {dobEntity.Text}");
                     }
                 }
                 else
                 {
-                    _logger.LogInformation("No date found in the text");
+                    _logger.LogInformation("No DateOfBirth entities found.");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Date extraction failed: {ex.Message}");
+                _logger.LogError($"Entity extraction failed: {ex.Message}");
             }
         }
 
-
-        //Використовуємо Azure Text Analytics для витягання імен
-        private async Task ExtractNameAndMedicineAsync(string text, RecognizeText result)
+        private async Task ExtractHealthcareEntitiesAsync(string text, RecognizeText result)
         {
             try
             {
-                try
+                var batchInput = new List<string> { text };
+                var healthOp = await _textAnalyticsClient.StartAnalyzeHealthcareEntitiesAsync(batchInput);
+                await healthOp.WaitForCompletionAsync();
+
+                var medications = new List<string>();
+                var treatments = new List<string>();
+                var examination = new List<string>();
+
+                await foreach (var docPage in healthOp.GetValuesAsync())
                 {
-                    var response = await textAnalyticsClient.RecognizeEntitiesAsync(text);
-                    var personEntities = response.Value.Where(e => e.Category == EntityCategory.Person).ToList();
-
-                    if (personEntities.Any())
+                    foreach (var doc in docPage)
                     {
-                        var fullName = personEntities.First().Text;
-                        var nameParts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                        result.FirstName = nameParts.FirstOrDefault();
-                        result.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : null;
-
-                        _logger.LogInformation($"Successfully extracted name: {result.FirstName} {result.LastName}");
-                    }
-                    else
-                    {
-                        _logger.LogInformation("No person entities found in the text");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning($"Name extraction failed: {ex.Message}");
-                }
-
-                try
-                {
-                    List<string> batchInput = new List<string>() { text };
-
-                    AnalyzeHealthcareEntitiesOperation healthOperation =
-                        await textAnalyticsClient.StartAnalyzeHealthcareEntitiesAsync(batchInput);
-
-                    await healthOperation.WaitForCompletionAsync();
-
-                    var medications = new List<string>();
-                    var treatment = new List<string>();
-
-                    await foreach (AnalyzeHealthcareEntitiesResultCollection documentsInPage in healthOperation.GetValuesAsync())
-                    {
-                        foreach (AnalyzeHealthcareEntitiesResult document in documentsInPage)
+                        if (doc.HasError)
                         {
-                            if (document.HasError)
-                            {
-                                _logger.LogWarning($"Error in healthcare entity recognition: {document.Error.Message}");
-                                continue;
-                            }
-
-                            foreach (var entity in document.Entities)
-                            {
-                                if (entity.Category == HealthcareEntityCategory.MedicationName)
-                                {
-                                    medications.Add(entity.Text);
-                                    _logger.LogInformation($"Successfully extracted medicine: {entity.Text}");
-                                }
-                            }
-
-                            foreach (var entity in document.Entities)
-                            {
-                                if (entity.Category == HealthcareEntityCategory.TreatmentName)
-                                {
-                                    treatment.Add(entity.Text);
-                                    _logger.LogInformation(message: $"""Successfully extracted treatment: {entity.Text}""");
-                                }
-                            }
+                            _logger.LogWarning($"Healthcare entity recognition error: {doc.Error.Message}");
+                            continue;
                         }
 
-                        if (medications.Any())
+                        foreach (var entity in doc.Entities)
                         {
-                            result.Medicine = string.Join(", ", medications);
-                        }
-                        if (treatment.Any())
-                        {
-                            result.Treatment = string.Join(", ", treatment);
+                            if (entity.Category == HealthcareEntityCategory.MedicationName)
+                            {
+                                medications.Add(entity.Text);
+                                _logger.LogInformation($"Extracted medicine: {entity.Text}");
+                            }
+                            else if (entity.Category == HealthcareEntityCategory.TreatmentName)
+                            {
+                                treatments.Add(entity.Text);
+                                _logger.LogInformation($"Extracted treatment: {entity.Text}");
+                            }
+                            else if (entity.Category == HealthcareEntityCategory.ExaminationName)
+                            {
+                                examination.Add(entity.Text);
+                                _logger.LogInformation($"Extracted examination: {entity.Text}");
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Medicine extraction failed: {ex.Message}");
-                    throw;
+
+                    if (medications.Any())
+                        result.Medicine = string.Join(", ", medications);
+
+                    if (treatments.Any())
+                        result.Treatment = string.Join(", ", treatments);
+
+                    if (examination.Any())
+                        result.Examination = string.Join(", ", examination);
                 }
             }
+
             catch (Exception ex)
             {
-                _logger.LogError($"Combined extraction failed: {ex.Message}");
-                throw;
+                _logger.LogError($"Healthcare extraction failed: {ex.Message}");
             }
         }
 
 
-
     }
-
-
-
 }

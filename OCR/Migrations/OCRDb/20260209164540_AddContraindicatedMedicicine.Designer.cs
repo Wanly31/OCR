@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OCR.Data;
 
@@ -11,9 +12,11 @@ using OCR.Data;
 namespace OCR.Migrations.OCRDb
 {
     [DbContext(typeof(OCRDbContext))]
-    partial class OCRDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260209164540_AddContraindicatedMedicicine")]
+    partial class AddContraindicatedMedicicine
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,9 +95,6 @@ namespace OCR.Migrations.OCRDb
 
                     b.Property<DateOnly?>("DateDocument")
                         .HasColumnType("date");
-
-                    b.Property<string>("Examination")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
