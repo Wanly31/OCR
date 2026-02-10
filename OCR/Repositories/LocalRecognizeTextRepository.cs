@@ -49,6 +49,9 @@ namespace OCR.Repositories
             await dbContext.SaveChangesAsync();
         }
 
+        // TODO: Update this method after Patient model migration is complete
+        // This method uses deprecated RecognizeText.FirstName/LastName which have been moved to Patient model
+        /*
         public async Task<RecognizeText> UpdateAsync(Guid id, RecognizeText textDomainModel)
         {
             var existingText = await dbContext.RecognizedDocuments.FirstOrDefaultAsync(x => x.Id == id);
@@ -61,6 +64,27 @@ namespace OCR.Repositories
             existingText.LastName = textDomainModel.LastName;
             existingText.Medicine = textDomainModel.Medicine;
             existingText.Treatment = textDomainModel.Treatment;
+            existingText.DateDocument = textDomainModel.DateDocument;
+            
+            await dbContext.SaveChangesAsync();
+            return existingText;
+        }
+        */
+
+        public async Task<RecognizeText> UpdateAsync(Guid id, RecognizeText textDomainModel)
+        {
+            var existingText = await dbContext.RecognizedDocuments.FirstOrDefaultAsync(x => x.Id == id);
+            if (existingText == null)
+            {
+                return null;
+            }
+            
+            // Update only medical data (patient data is now in Patient table)
+            existingText.Medicine = textDomainModel.Medicine;
+            existingText.Treatment = textDomainModel.Treatment;
+            existingText.Examination = textDomainModel.Examination;
+            existingText.ContraindicatedMedicine = textDomainModel.ContraindicatedMedicine;
+            existingText.ContraindicatedReason = textDomainModel.ContraindicatedReason;
             existingText.DateDocument = textDomainModel.DateDocument;
             
             await dbContext.SaveChangesAsync();

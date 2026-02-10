@@ -25,6 +25,10 @@ namespace OCR.Controllers
         public IRecognizeTextRepository RecognizeTextRepository { get; }
         public RecognizeTextService RecognizeTextService { get; }
 
+        // TODO: These legacy endpoints need to be updated to work with new Patient model
+        // For now, use OcrController.UploadAndRecognize and OcrController.ConfirmPatient instead
+
+        /* DEPRECATED - Use OcrController.UploadAndRecognize instead
         [HttpPost("{id}")]
         public async Task<IActionResult> RecognizeTextAsync(Guid id)
         {
@@ -85,6 +89,7 @@ namespace OCR.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        */
        
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -95,21 +100,18 @@ namespace OCR.Controllers
                 throw new Exception("No texts found");
             }
 
-            var textDto = new List<RecognizeTextDto>();
-
-            foreach (var textDomain in TextDomain)
+            // Tempor ary fix - include patient data via navigation property
+            var textDto = TextDomain.Select(textDomain => new
             {
-                textDto.Add(new RecognizeTextDto
-                {
-                    Id = textDomain.Id,
-                    FirstName = textDomain.FirstName,
-                    LastName = textDomain.LastName,
-                    Medicine = textDomain.Medicine,
-                    Treatment = textDomain.Treatment,
-                    DateDocument = textDomain.DateDocument,
-                    CreatedAt = textDomain.CreatedAt
-                });
-            }
+                textDomain.Id,
+                FirstName = textDomain.Patient?.FirstName,
+                LastName = textDomain.Patient?.LastName,
+                textDomain.Medicine,
+                textDomain.Treatment,
+                textDomain.DateDocument,
+                textDomain.CreatedAt
+            }).ToList();
+
             return Ok(textDto);
         }
 
@@ -122,21 +124,22 @@ namespace OCR.Controllers
                 throw new Exception($"Text whith id: {id} not found");
             }
 
-            var textDto = new RecognizeTextDto
+            // Temporary fix - include patient data via navigation property 
+            var textDto = new
             {
-                Id = docDto.Id,
-                FirstName = docDto.FirstName,
-                LastName = docDto.LastName,
-                Medicine = docDto.Medicine,
-                Treatment = docDto.Treatment,
-                DateDocument = docDto.DateDocument,
-                CreatedAt = docDto.CreatedAt
-
+                docDto.Id,
+                FirstName = docDto.Patient?.FirstName,
+                LastName = docDto.Patient?.LastName,
+                docDto.Medicine,
+                docDto.Treatment,
+                docDto.DateDocument,
+                docDto.CreatedAt
             };
 
             return Ok(textDto);
         }
 
+        /* DEPRECATED - Patient data should be updated via PatientController
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRecognizeTextDto updateRecognizeTextDto)
         {
@@ -167,6 +170,7 @@ namespace OCR.Controllers
 
             return Ok (textDto);
         }
+        */
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)

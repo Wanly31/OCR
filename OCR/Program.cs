@@ -42,6 +42,7 @@ builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IDocumentRepository, LocalDocumentRepository>();
 builder.Services.AddScoped<IRecognizeTextRepository, LocalRecognizeTextRepository>();
 builder.Services.AddScoped<IRecognizeRepository, LocalRecognizeRepository>();
+builder.Services.AddScoped<IPatientRepository, LocalPatientRepository>();
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()

@@ -1,38 +1,40 @@
 ﻿using Azure;
 using Azure.AI.TextAnalytics;
-using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
+using Microsoft.Extensions.Configuration;
 using OCR.Models.Domain;
+using OCR.Models.DTO;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace OCR.Services
 {
     public class RecognizeTextService
     {
-        private readonly ILogger<RecognizeTextService> _logger;
         private readonly TextAnalyticsClient _textAnalyticsClient;
+        private readonly ILogger<RecognizeTextService> _logger;
 
-        public RecognizeTextService(ILogger<RecognizeTextService> logger, IConfiguration configuration)
+        public RecognizeTextService(IConfiguration configuration, ILogger<RecognizeTextService> logger)
         {
             _logger = logger;
 
-            var endpoint = configuration["AzureLanguage:Endpoint"] 
-                ?? throw new InvalidOperationException("Azure Language endpoint is not configured.");
+            var endpoint = configuration["AzureLanguage:Endpoint"]
+                ?? throw new InvalidOperationException("Azure Language endpoint not configured");
             var key = configuration["AzureLanguage:Key"]
-                ?? throw new InvalidOperationException("Azure Language key is not configured.");
+                ?? throw new InvalidOperationException("Azure Language key not configured");
 
             _textAnalyticsClient = new TextAnalyticsClient(
                 new Uri(endpoint),
                 new AzureKeyCredential(key));
         }
 
-        public async Task<RecognizeText> RecognizeText(string text)
+        public async Task<RecognizedTextResultDto> RecognizeText(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
                 throw new ArgumentException("Input text cannot be null or empty.", nameof(text));
             }
 
-            var result = new RecognizeText();
+            var result = new RecognizedTextResultDto();
 
             var entityTask = ExtractEntitiesAsync(text, result);
             var healthcareTask = ExtractHealthcareEntitiesAsync(text, result);
@@ -42,7 +44,7 @@ namespace OCR.Services
             return result;
         }
 
-        private async Task ExtractEntitiesAsync(string text, RecognizeText result)
+        private async Task ExtractEntitiesAsync(string text, RecognizedTextResultDto result)
         {
             try
             {
@@ -89,7 +91,8 @@ namespace OCR.Services
             }
         }
 
-        private async Task ExtractHealthcareEntitiesAsync(string text, RecognizeText result)
+
+        private async Task ExtractHealthcareEntitiesAsync(string text, RecognizedTextResultDto result)
         {
             try
             {
@@ -159,7 +162,8 @@ namespace OCR.Services
             }
         }
 
-        private List<string> ExtractContraindicatedMedicines(string text, List<(string Text, int Offset)> allMedications, RecognizeText result)
+
+        private List<string> ExtractContraindicatedMedicines(string text, List<(string Text, int Offset)> allMedications, RecognizedTextResultDto result)
         {
             try
             {

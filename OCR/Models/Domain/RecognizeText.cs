@@ -3,9 +3,12 @@
     public class RecognizeText
     {
         public Guid Id { get; set; }
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
-        public DateOnly? BirthDate { get; set; }
+
+        // Foreign key до Patient
+        public Guid PatientId { get; set; }
+        public Patient Patient { get; set; } 
+
+        // Медичні дані
         public string? Examination { get; set; }
         public string? Medicine { get; set; }
         public string? Treatment { get; set; }
@@ -14,7 +17,7 @@
         public DateOnly? DateDocument { get; set; }
         public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 
-        //Foreign key   
+        //Foreign key до Recognize  
         public Guid RecognizedTextId { get; set; }
         public Recognize RecognizedText { get; set; }
 

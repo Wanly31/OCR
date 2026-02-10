@@ -18,6 +18,7 @@ namespace OCR.Controllers
 
         private readonly RecognizeTextService _recognizeTextService;
         private readonly AzureOcrService ocrService;
+        private readonly IPatientRepository _patientRepository;
         private readonly ILogger _logger;
 
         public OcrController(
@@ -26,6 +27,7 @@ namespace OCR.Controllers
             IRecognizeTextRepository recognizeTextRepository, 
             RecognizeTextService recognizeTextService,
             AzureOcrService ocrService,
+            IPatientRepository patientRepository,
             ILogger<OcrController> logger)
         {
             DocumentRepository = documentRepository;
@@ -33,6 +35,7 @@ namespace OCR.Controllers
             RecognizeTextRepository = recognizeTextRepository;
             _recognizeTextService = recognizeTextService;
             this.ocrService = ocrService;
+            _patientRepository = patientRepository;
             _logger = logger;
 
         }
@@ -110,7 +113,7 @@ namespace OCR.Controllers
                 }
 
                 _logger.LogInformation("Extracting structured data from recognized text");
-                RecognizeText recogText;
+                RecognizedTextResultDto recogText;
                 try
                 {
                     recogText = await _recognizeTextService.RecognizeText(recognized.Text);
@@ -121,13 +124,45 @@ namespace OCR.Controllers
                     return BadRequest("Error extracting structured data from recognized text");
                 }
 
+                // Search for similar patients
+                var similarPatients = await _patientRepository.SearchSimilarAsync(
+                    recogText.FirstName ?? "",
+                    recogText.LastName,
+                    recogText.BirthDate
+                );
+
+                if (similarPatients.Any())
+                {
+                    // Found similar patients - return them for user confirmation
+                    _logger.LogInformation($"Found {similarPatients.Count} similar patients");
+                    return Ok(new
+                    {
+                        requiresConfirmation = true,
+                        recognizedId = recognized.Id,
+                        recognizedData = recogText,
+                        similarPatients = similarPatients.Select(p => new
+                        {
+                            p.Id,
+                            p.FirstName,
+                            p.LastName,
+                            p.BirthDate,
+                            recordCount = p.MedicalRecords?.Count ?? 0
+                        })
+                    });
+                }
+
+                // No similar patients - create new patient automatically
+                var newPatient = await _patientRepository.CreateAsync(new Patient
+                {
+                    FirstName = recogText.FirstName ?? "Unknown",
+                    LastName = recogText.LastName,
+                    BirthDate = recogText.BirthDate
+                });
 
                 var recognizeTextDomain = new RecognizeText
                 {
                     Id = Guid.NewGuid(),
-                    FirstName = recogText.FirstName,
-                    LastName = recogText.LastName,
-                    BirthDate = recogText.BirthDate,
+                    PatientId = newPatient.Id,
                     Examination = recogText.Examination,
                     Medicine = recogText.Medicine,
                     Treatment = recogText.Treatment,
@@ -169,6 +204,73 @@ namespace OCR.Controllers
 
             return BadRequest();
 
+        }
+
+        [HttpPost("ConfirmPatient")]
+        public async Task<IActionResult> ConfirmPatient([FromBody] PatientConfirmationDto request)
+        {
+            _logger.LogInformation($"Patient confirmation request received. ExistingPatientId: {request.ExistingPatientId}");
+
+            Patient patient;
+
+            if (request.ExistingPatientId.HasValue)
+            {
+                // Use existing patient
+                patient = await _patientRepository.GetByIdAsync(request.ExistingPatientId.Value);
+                if (patient == null)
+                {
+                    return NotFound(new { message = $"Patient with ID {request.ExistingPatientId.Value} not found" });
+                }
+                _logger.LogInformation($"Using existing patient: {patient.Id}");
+            }
+            else
+            {
+                // Create new patient
+                patient = await _patientRepository.CreateAsync(new Patient
+                {
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    BirthDate = request.BirthDate
+                });
+                _logger.LogInformation($"Created new patient: {patient.Id}");
+            }
+
+            // Create medical record linked to patient
+            var recognizeText = new RecognizeText
+            {
+                Id = Guid.NewGuid(),
+                PatientId = patient.Id,
+                Examination = request.RecognizedData.Examination,
+                Medicine = request.RecognizedData.Medicine,
+                Treatment = request.RecognizedData.Treatment,
+                ContraindicatedMedicine = request.RecognizedData.ContraindicatedMedicine,
+                ContraindicatedReason = request.RecognizedData.ContraindicatedReason,
+                DateDocument = request.RecognizedData.DateDocument,
+                RecognizedTextId = request.RecognizedId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            try
+            {
+                await RecognizeTextRepository.SaveRecognizedTextAsync(recognizeText);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error saving recognized text to repository: {ex.Message}");
+                return BadRequest("Error saving recognized text");
+            }
+
+            return Ok(new
+            {
+                patient = new
+                {
+                    patient.Id,
+                    patient.FirstName,
+                    patient.LastName,
+                    patient.BirthDate
+                },
+                record = recognizeText
+            });
         }
 
         private void ValidateFileUpload(DocumentUploadRequestDto request)
