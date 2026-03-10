@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Recognizers.Text;
-using OCR.Models.Domain;
-using OCR.Models.DTO;
-using OCR.Repositories;
-using OCR.Services;
+using OCR.Domain.Entities;
+using OCR.Application.DTOs;
+using OCR.Domain.Interfaces;
+using OCR.Infrastructure.Services;
 
-namespace OCR.Controllers
+namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

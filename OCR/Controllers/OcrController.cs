@@ -1,15 +1,15 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
-using OCR.Models.Domain;
-using OCR.Models.DTO;
-using OCR.Repositories;
-using OCR.Services;
+using OCR.Domain.Entities;
+using OCR.Application.DTOs;
+using OCR.Domain.Interfaces;
+using OCR.Infrastructure.Services;
 using System.Reflection.Metadata;
 using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
-using Document = OCR.Models.Domain.Document;
+using Document = OCR.Domain.Entities.Document;
 
-namespace OCR.Controllers
+namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
-using OCR.Models.Domain;
-using OCR.Models.DTO;
-using OCR.Repositories;
-using OCR.Services;
+using OCR.Domain.Entities;
+using OCR.Application.DTOs;
+using OCR.Domain.Interfaces;
 
-namespace OCR.Controllers
+namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

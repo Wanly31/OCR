@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11519.219 insiders
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCR", "OCR\OCR.csproj", "{C7015746-1B76-43C9-B5A6-F7E655C54784}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCR.Host", "OCR\OCR.Host.csproj", "{C7015746-1B76-43C9-B5A6-F7E655C54784}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCR.Application", "OCR.Application\OCR.Application.csproj", "{A1B52417-3964-4E66-AF79-894C1F0A7D61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCR.Infrastructure", "OCR.Infrastructure\OCR.Infrastructure.csproj", "{DA4982DC-A6E1-4293-B020-4BC20E89798D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCR.Domain", "OCR.Domain\OCR.Domain.csproj", "{F2EB2DB0-2B51-46FC-828A-F3F3046BAB66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{C7015746-1B76-43C9-B5A6-F7E655C54784}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7015746-1B76-43C9-B5A6-F7E655C54784}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7015746-1B76-43C9-B5A6-F7E655C54784}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B52417-3964-4E66-AF79-894C1F0A7D61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B52417-3964-4E66-AF79-894C1F0A7D61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B52417-3964-4E66-AF79-894C1F0A7D61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B52417-3964-4E66-AF79-894C1F0A7D61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA4982DC-A6E1-4293-B020-4BC20E89798D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA4982DC-A6E1-4293-B020-4BC20E89798D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA4982DC-A6E1-4293-B020-4BC20E89798D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA4982DC-A6E1-4293-B020-4BC20E89798D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2EB2DB0-2B51-46FC-828A-F3F3046BAB66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2EB2DB0-2B51-46FC-828A-F3F3046BAB66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2EB2DB0-2B51-46FC-828A-F3F3046BAB66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2EB2DB0-2B51-46FC-828A-F3F3046BAB66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

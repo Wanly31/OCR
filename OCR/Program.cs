@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using OCR.Data;
-using OCR.Repositories;
-using OCR.Services;
+using OCR.Domain.Interfaces;                   
+using OCR.Infrastructure.Repositories;          
+using OCR.Infrastructure.Data;                   
+using OCR.Infrastructure.Services;               
 using Serilog;
 using System.Text;
 

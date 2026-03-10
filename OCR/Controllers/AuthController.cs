@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using OCR.Models.DTO;
-using OCR.Repositories;
+using OCR.Application.DTOs;
+using OCR.Domain.Interfaces;
 
-namespace OCR.Controllers
+namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
