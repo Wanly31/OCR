@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 
 namespace OCR.Infrastructure.Repositories
 {
-    public class TokenRepository : ITokenRepository
+    public class TokenRepository : ITokenService
     {
         private readonly IConfiguration configuration;
         public TokenRepository(IConfiguration configuration)

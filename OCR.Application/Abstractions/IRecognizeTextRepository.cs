@@ -1,6 +1,6 @@
-﻿using OCR.Domain.Entities;
+using OCR.Domain.Entities;
 
-namespace OCR.Domain.Interfaces
+namespace OCR.Application.Abstractions
 {
     public interface IRecognizeTextRepository
     {

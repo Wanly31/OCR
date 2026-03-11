@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OCR.Domain.Entities;
 using OCR.Application.DTOs;          
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 
 namespace OCR.Host.Controllers
 {

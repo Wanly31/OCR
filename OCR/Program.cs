@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using OCR.Domain.Interfaces;                   
+using OCR.Application.Abstractions;                   
 using OCR.Infrastructure.Repositories;          
 using OCR.Infrastructure.Data;                   
 using OCR.Infrastructure.Services;               
@@ -39,7 +39,7 @@ builder.Services.AddDbContext<OCRAuthDbContext>(options =>
 builder.Services.AddDbContext<OCRDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OCRConnectionString")));
 
-builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+builder.Services.AddScoped<ITokenService, TokenRepository>();
 builder.Services.AddScoped<IDocumentRepository, LocalDocumentRepository>();
 builder.Services.AddScoped<IRecognizeTextRepository, LocalRecognizeTextRepository>();
 builder.Services.AddScoped<IRecognizeRepository, LocalRecognizeRepository>();

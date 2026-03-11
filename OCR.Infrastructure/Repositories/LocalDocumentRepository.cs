@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OCR.Domain.Entities;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 using OCR.Infrastructure.Data;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -62,20 +62,6 @@ namespace OCR.Infrastructure.Repositories
 
         public async Task<Document> Upload(Document document)
         {
-            var localFilePath = Path.Combine(webHostEnvironment.ContentRootPath, "Documents",
-               $"{document.FileName}{document.FileExtension}");
-
-            //upload file to local path
-            using var stream = new FileStream(localFilePath, FileMode.Create);
-            await document.File.CopyToAsync(stream);
-
-            //https://localhost:123/images/images.jpg
-
-            var urlFilePath = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}{httpContextAccessor.HttpContext.Request.PathBase}/Documents/{document.FileName}{document.FileExtension}";
-
-            document.FilePath = urlFilePath;
-
-            //add image to database
             await dbContext.Documents.AddAsync(document);
             await dbContext.SaveChangesAsync();
 

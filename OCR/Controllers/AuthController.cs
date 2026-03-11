@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OCR.Application.DTOs;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 
 namespace OCR.Host.Controllers
 {
@@ -11,9 +11,9 @@ namespace OCR.Host.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
-        private readonly ITokenRepository tokenRepository;
+        private readonly ITokenService tokenRepository;
 
-        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository)
+        public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenRepository)
         {
             this.userManager = userManager;
             this.tokenRepository = tokenRepository;

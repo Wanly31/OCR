@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OCR.Domain.Entities;
 using OCR.Application.DTOs;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 using OCR.Infrastructure.Services;
 using System.Reflection.Metadata;
 using System.Xml.Linq;
@@ -53,7 +53,6 @@ namespace OCR.Host.Controllers
             {
                 var documentDomainModel = new Document
                 {
-                    File = requestDto.File,
                     FileExtension = Path.GetExtension(requestDto.File.FileName),
                     FileSizeInBytes = requestDto.File.Length,
                     FileDescription = requestDto.FileDescription,

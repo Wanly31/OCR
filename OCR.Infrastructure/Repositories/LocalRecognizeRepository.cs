@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OCR.Domain.Entities;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 using OCR.Infrastructure.Data;
 
 namespace OCR.Infrastructure.Repositories

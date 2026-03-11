@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using OCR.Domain.Entities;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 using OCR.Infrastructure.Data;
 using static System.Net.Mime.MediaTypeNames;
 

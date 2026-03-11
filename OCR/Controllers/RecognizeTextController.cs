@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Recognizers.Text;
 using OCR.Domain.Entities;
 using OCR.Application.DTOs;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 using OCR.Infrastructure.Services;
 
 namespace OCR.Host.Controllers

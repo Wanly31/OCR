@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using OCR.Domain.Entities;
 using OCR.Application.DTOs;
-using OCR.Domain.Interfaces;
+using OCR.Application.Abstractions;
 
 namespace OCR.Host.Controllers
 {
@@ -27,7 +27,6 @@ namespace OCR.Host.Controllers
             {
                 var documentDomainModel = new Document
                 {
-                    File = request.File,
                     FileExtension = Path.GetExtension(request.File.FileName),
                     FileSizeInBytes = request.File.Length,
                     FileDescription = request.FileDescription,
@@ -59,7 +58,6 @@ namespace OCR.Host.Controllers
                 {
                     FileName = documentDomain.FileName,
                     FileDescription = documentDomain.FileDescription,
-                    File = documentDomain.File,
                     FileSizeInBytes = documentDomain.FileSizeInBytes
                 }
                 );
