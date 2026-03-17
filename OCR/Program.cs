@@ -3,16 +3,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using OCR.Application.Abstractions;                   
-using OCR.Infrastructure.Repositories;          
-using OCR.Infrastructure.Data;                   
-using OCR.Infrastructure.Services;               
+using OCR.Application.Abstractions;
+using OCR.Infrastructure.Repositories;
+using OCR.Infrastructure.Data;
+using OCR.Infrastructure.Services;
 using Serilog;
 using System.Text;
+using OCR.Infrastructure;
+using OCR.Host.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 //add Logger
 var logger = new LoggerConfiguration()
@@ -25,65 +25,15 @@ var logger = new LoggerConfiguration()
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
-
-builder.Services.AddControllers();
-builder.Services.AddHttpContextAccessor();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<AzureOcrService>();
-builder.Services.AddScoped<RecognizeTextService>();
-
-builder.Services.AddDbContext<OCRAuthDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("OCRAuthConnectionString")));
-builder.Services.AddDbContext<OCRDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("OCRConnectionString")));
-
-builder.Services.AddScoped<ITokenService, TokenRepository>();
-builder.Services.AddScoped<IDocumentRepository, LocalDocumentRepository>();
-builder.Services.AddScoped<IRecognizeTextRepository, LocalRecognizeTextRepository>();
-builder.Services.AddScoped<IRecognizeRepository, LocalRecognizeRepository>();
-builder.Services.AddScoped<IPatientRepository, LocalPatientRepository>();
-
-builder.Services.AddIdentityCore<IdentityUser>()
-    .AddRoles<IdentityRole>()
-    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Course")
-    .AddEntityFrameworkStores<OCRAuthDbContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.Configure<IdentityOptions>(options => {
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
-});
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
-    AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    });
-
+builder.Services.AddInfrastructureDI(builder.Configuration);
+builder.Services.AddPresentation(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwaggerMiddleware();
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -95,3 +45,4 @@ app.UseStaticFiles(new StaticFileOptions
 app.MapControllers();
 
 await app.RunAsync();
+

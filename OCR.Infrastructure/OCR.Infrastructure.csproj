@@ -6,7 +6,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\OCR.Domain\OCR.Domain.csproj" />
 		<ProjectReference Include="..\OCR.Application\OCR.Application.csproj" />
 	</ItemGroup>
 
