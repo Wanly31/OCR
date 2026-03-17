@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using OCR.Application.Common.Exceptions;
+using System.Net;
 
 namespace OCR.Middlewares
 {
@@ -20,6 +21,13 @@ namespace OCR.Middlewares
             {
                 await next(httpContext);
             }
+            catch (NotFoundException ex)
+            {
+                httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                httpContext.Response.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(new { ErrorMessage = ex.Message });
+            }
+
             catch (Exception ex)
             {
 

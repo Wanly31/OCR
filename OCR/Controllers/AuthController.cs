@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OCR.Application.DTOs;
 using OCR.Application.Abstractions;
+using OCR.Application.Features.Auth.RegisterUser;
+using MediatR;
 
 namespace OCR.Host.Controllers
 {
@@ -12,37 +14,21 @@ namespace OCR.Host.Controllers
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly ITokenService tokenRepository;
+        private readonly IMediator _mediator;
 
-        public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenRepository)
+        public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenRepository, IMediator mediator)
         {
             this.userManager = userManager;
             this.tokenRepository = tokenRepository;
+            _mediator = mediator;
         }
 
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
+        public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
-            var identityUser = new IdentityUser
-            {
-                UserName = registerRequestDto.Username,
-                Email = registerRequestDto.Username
-            };
-
-            var identityResult = await userManager.CreateAsync(identityUser, registerRequestDto.Password);
-
-            if (identityResult.Succeeded)
-            {
-                if (registerRequestDto.Roles != null && registerRequestDto.Roles.Length > 0)
-                {
-                    identityResult = await userManager.AddToRolesAsync(identityUser, registerRequestDto.Roles);
-                    if (identityResult.Succeeded)
-                    {
-                        return Ok("User registered successfully with roles.");
-                    }
-                }
-            }
-            return BadRequest("User registration failed.");
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
 
         [HttpPost]

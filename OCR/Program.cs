@@ -1,16 +1,9 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.IdentityModel.Tokens;
-using OCR.Application.Abstractions;
-using OCR.Infrastructure.Repositories;
-using OCR.Infrastructure.Data;
-using OCR.Infrastructure.Services;
 using Serilog;
-using System.Text;
 using OCR.Infrastructure;
 using OCR.Host.Extensions;
+using OCR.Application;
+using OCR.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +20,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 builder.Services.AddInfrastructureDI(builder.Configuration);
 builder.Services.AddPresentation(builder.Configuration);
+builder.Services.AddApplication();
 
 var app = builder.Build();
 
@@ -41,7 +35,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Documents"
     //https://localhost:7242/Images/filename.jpg
 });
-
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.MapControllers();
 
 await app.RunAsync();

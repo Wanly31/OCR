@@ -6,11 +6,6 @@ using OCR.Application.Abstractions;
 using OCR.Infrastructure.Data;
 using OCR.Infrastructure.Repositories;
 using OCR.Infrastructure.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OCR.Infrastructure
 {
@@ -29,7 +24,10 @@ namespace OCR.Infrastructure
             services.AddScoped<IRecognizeTextRepository, LocalRecognizeTextRepository>();
             services.AddScoped<IRecognizeRepository, LocalRecognizeRepository>();
             services.AddScoped<IPatientRepository, LocalPatientRepository>();
-            
+            services.AddScoped<IOcrProvider, AzureOcrService>();
+            services.AddScoped<IMedicalExtractionService, AzureMedicalTextExtractionService>();
+            services.AddScoped<IFileStorage, LocalFileStorageService>();
+
             services.AddIdentityCore<IdentityUser>()
                 .AddRoles<IdentityRole>()
                 .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Course")
@@ -47,6 +45,7 @@ namespace OCR.Infrastructure
 
             services.AddScoped<AzureOcrService>();
             services.AddScoped<RecognizeTextService>();
+
 
             return services;
         }

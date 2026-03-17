@@ -1,11 +1,12 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Extensions.Configuration;
+using OCR.Application.Abstractions;
 using System.Text;
 
 namespace OCR.Infrastructure.Services
 {
-    public class AzureOcrService
+    public class AzureOcrService : IOcrProvider
     {
         private readonly string endpoint;
         private readonly string key;
@@ -24,7 +25,7 @@ namespace OCR.Infrastructure.Services
             };
         }
 
-        public async Task<string> ReadDocumentAsync(string filePath)
+        public async Task<string> RecognizeTextFromFileAsync(string filePath)
         {
             var client = Authenticate();
 
@@ -49,6 +50,7 @@ namespace OCR.Infrastructure.Services
 
             return sb.ToString();
         }
+
     }
 }
 

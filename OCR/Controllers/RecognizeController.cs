@@ -34,7 +34,7 @@ namespace OCR.Host.Controllers
                 throw new Exception($"File {filePath} not found.");
 
             // Викликати Azure OCR сервіс для розпізнавання
-            string recognizedText = await ocrService.ReadDocumentAsync(filePath);
+            string recognizedText = await ocrService.RecognizeTextFromFileAsync(filePath);
 
             // Зберегти результат у базі
             var recognized = new Recognize
