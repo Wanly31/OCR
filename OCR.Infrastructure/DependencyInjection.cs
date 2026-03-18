@@ -43,10 +43,6 @@ namespace OCR.Infrastructure
                 options.Password.RequiredUniqueChars = 1;
             });
 
-            services.AddScoped<AzureOcrService>();
-            services.AddScoped<RecognizeTextService>();
-
-
             return services;
         }
     }

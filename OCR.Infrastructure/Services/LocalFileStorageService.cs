@@ -7,12 +7,25 @@ namespace OCR.Infrastructure.Services
     {
         public Task DeleteFileAsync(string filePath)
         {
-            throw new NotImplementedException();
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+
+            return Task.CompletedTask;
         }
 
-        public Task<string> SaveFileAsync(IFormFile file, string fileName)
+        public async Task<string> SaveFileAsync(IFormFile file, string fileName)
         {
-            throw new NotImplementedException();
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Documents");
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var filePath = Path.Combine(folderPath, fileName);
+
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            return filePath;
         }
     }
 }

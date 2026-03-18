@@ -1,8 +1,11 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace OCR.Application.DTOs
 {
-    /// <summary>
-    /// DTO для результатів розпізнавання тексту з OCR
-    /// </summary>
     public class RecognizedTextResultDto
     {
         // Дані пацієнта

@@ -20,5 +20,10 @@
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="MediatR.Contracts.CQRS" Version="1.0.0" />
   </ItemGroup>
+	
+  <ItemGroup>
+    <Folder Include="Features\Documents\Quaries\" />
+    <Folder Include="Features\Documents\Commands\" />
+  </ItemGroup>
 
 </Project>
