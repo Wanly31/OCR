@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using OCR.Application.Features.Ocr.Commands.UploadAndRecognizeDocument;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using OCR.Application.Features.Ocr.Commands.ConfirmPatient;
+using OCR.Application.Features.Ocr.Commands.UploadAndRecognizeDocument;
+using OCR.Application.Features.Ocr.Quaries.GetRecognizeResultById;
 
 namespace OCR.Host.Controllers
 {
@@ -27,6 +28,13 @@ namespace OCR.Host.Controllers
         public async Task<IActionResult> ConfirmPatient([FromBody] ConfirmPatientCommand command)
         {
             var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPost("GetRecognizeResultById")]
+        public async Task<IActionResult> GetById(Guid Id)
+        {
+            var result = await _mediator.Send(new GetRecognizeResultByIdQuery(Id));
             return Ok(result);
         }
     }

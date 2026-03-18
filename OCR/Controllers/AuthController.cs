@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using OCR.Application.DTOs;
-using OCR.Application.Abstractions;
 using OCR.Application.Features.Auth.RegisterUser;
 using MediatR;
+using OCR.Application.Features.Auth.LoginUser;
 
 namespace OCR.Host.Controllers
 {
@@ -12,14 +9,10 @@ namespace OCR.Host.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly ITokenService tokenRepository;
         private readonly IMediator _mediator;
 
-        public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenRepository, IMediator mediator)
+        public AuthController(IMediator mediator)
         {
-            this.userManager = userManager;
-            this.tokenRepository = tokenRepository;
             _mediator = mediator;
         }
 
@@ -34,33 +27,10 @@ namespace OCR.Host.Controllers
         [HttpPost]
         [Route("Login")]
 
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
+        public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
         {
-            var user = await userManager.FindByNameAsync(loginRequestDto.Username);
-
-            if(user != null)
-            {
-                var checkPassword = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
-                
-                if (checkPassword)
-                {
-                    var roles = await userManager.GetRolesAsync(user);
-                    if (roles != null)
-                    {
-                        var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList());
-                        var response = new LoginResponseDto
-                        {
-                            JwtToken = jwtToken
-                        };
-                        return Ok(jwtToken);
-                    }
-                }
-            }
-            return BadRequest("Login failed.");
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
-
-
      }
-
-
 }
