@@ -1,8 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using OCR.Application.Abstractions;
-using OCR.Application.DTOs;
-
 
 namespace OCR.Application.Features.Auth.LoginUser
 {
@@ -32,17 +30,14 @@ namespace OCR.Application.Features.Auth.LoginUser
                     if (roles != null)
                     {
                         var jwtToken = _tokenRepository.CreateJWTToken(user, roles.ToList());
-                        var response = new LoginResponseDto
-                        {
-                            JwtToken = jwtToken
-                        };
 
                         return new LoginUserResult(
                             _jwtToken: jwtToken);
                     }
                 }
             }
-            throw new Exception();
+
+            throw new UnauthorizedAccessException("Invalid username or password");
         }
     }
     }

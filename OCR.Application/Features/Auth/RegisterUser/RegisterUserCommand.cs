@@ -1,6 +1,4 @@
-﻿
-
-using MediatR;
+﻿using MediatR;
 
 namespace OCR.Application.Features.Auth.RegisterUser
 {

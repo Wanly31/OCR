@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using OCR.Application.Abstractions;
 using OCR.Application.Common.Exceptions;
-using OCR.Application.DTOs;
 
 namespace OCR.Application.Features.Auth.RegisterUser
 {
@@ -43,9 +42,15 @@ namespace OCR.Application.Features.Auth.RegisterUser
                     }
                 }
             }
-                var errors = string.Join(", ", identityResult.Errors.Select(e => e.Description));
-                throw new Exception(errors);
-            }
+            var errors = new Dictionary<string, string[]>
+            {
+                { 
+                    "Registration", identityResult.Errors.Select(e => e.Description).ToArray() 
+                }
+            };
+            
+            throw new ValidationException(errors);
         }
     }
+}
     

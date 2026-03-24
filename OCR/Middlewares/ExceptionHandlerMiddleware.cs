@@ -28,6 +28,20 @@ namespace OCR.Middlewares
                 await httpContext.Response.WriteAsJsonAsync(new { ErrorMessage = ex.Message });
             }
 
+            catch (UnauthorizedAccessException ex)
+            {
+                httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                httpContext.Response.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(new { ErrorMessage = ex.Message });
+            }
+
+            catch (ValidationException ex)
+            {
+                httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                httpContext.Response.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(new { ErrorMessage = ex.Message });
+            }
+
             catch (Exception ex)
             {
 

@@ -22,8 +22,8 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <Folder Include="Features\Documents\Quaries\" />
-    <Folder Include="Features\Documents\Commands\" />
+    <Folder Include="Features\Documents\Queries\" />
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>

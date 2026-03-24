@@ -44,7 +44,6 @@ public class UploadAndRecognizeDocumentCommandHandler
         _logger.LogInformation("Starting file upload and OCR processing");
 
         // 1. Зберігаємо файл через IFileStorage
-        // Зверни увагу: розширення додається всередині IFileStorage або тут
         var extension = Path.GetExtension(request.File.FileName);
         string newName = Guid.NewGuid().ToString() + extension;
         string savedFilePath = await _fileStorage.SaveFileAsync(request.File, newName);
@@ -103,6 +102,7 @@ public class UploadAndRecognizeDocumentCommandHandler
                 RecordCount = p.MedicalRecords?.Count ?? 0
             });
 
+
             // Повертаємо інформацію, що потрібне підтвердження (RequiresConfirmation = true)
             return new UploadAndRecognizeDocumentResult(
                 RequiresConfirmation: true,
@@ -111,6 +111,9 @@ public class UploadAndRecognizeDocumentCommandHandler
                 SimilarPatients: similarPatientDtos
             );
         }
+            
+        //ДОРОБИТИ: Зупинитися, дати користувачу редагувати інформацію
+
 
         // 7. Якщо пацієнтів не знайдено - створюємо нового
         var newPatient = await _patientRepo.CreateAsync(new Patient

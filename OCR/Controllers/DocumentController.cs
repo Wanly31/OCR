@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Update.Internal;
 using OCR.Domain.Entities;
 using OCR.Application.DTOs;
 using OCR.Application.Abstractions;
+using MediatR;
+using OCR.Application.Features.Documents.Commands.DeleteDocument;
 
 namespace OCR.Host.Controllers
 {
@@ -11,60 +11,16 @@ namespace OCR.Host.Controllers
     [ApiController]
     public class DocumentController : ControllerBase
     {
-        public DocumentController(IDocumentRepository documentRepository)
+        private readonly IMediator _mediator;
+
+        public DocumentController(IDocumentRepository documentRepository, IMediator mediator)
         {
             DocumentRepository = documentRepository;
+            _mediator = mediator;
         }
 
         public IDocumentRepository DocumentRepository { get; }
 
-        [HttpPost("Upload")]
-        public async Task<IActionResult> Upload([FromForm] DocumentUploadRequestDto request)
-        {
-            ValidateFileUpload(request);
-
-            if (ModelState.IsValid)
-            {
-                var documentDomainModel = new Document
-                {
-                    FileExtension = Path.GetExtension(request.File.FileName),
-                    FileSizeInBytes = request.File.Length,
-                    FileDescription = request.FileDescription,
-                    FileName = request.FileName
-                };
-
-                await DocumentRepository.Upload(documentDomainModel);
-
-                return Ok(documentDomainModel);
-            }
-
-            return BadRequest(ModelState);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var DocumentsDomain = await DocumentRepository.GetAllAsync();
-            if (DocumentsDomain == null || DocumentsDomain.Count == 0)
-            {
-                return NotFound("No documents found");
-            }
-
-            var documentDto = new List<DocumentDto>();
-
-            foreach (var documentDomain in DocumentsDomain)
-            {
-                documentDto.Add(new DocumentDto
-                {
-                    FileName = documentDomain.FileName,
-                    FileDescription = documentDomain.FileDescription,
-                    FileSizeInBytes = documentDomain.FileSizeInBytes
-                }
-                );
-            }
-
-            return Ok(documentDto);
-        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
@@ -88,58 +44,13 @@ namespace OCR.Host.Controllers
             return Ok(documentDto);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDocumentRequestDto updateDocumentRequestDto)
-        {
-            var DocumentDomainModel = new Document
-            {
-                FileName = updateDocumentRequestDto.FileName,
-                FileDescription = updateDocumentRequestDto.FileDescription
-            };
-
-            DocumentDomainModel = await DocumentRepository.UpdateAsync(id, DocumentDomainModel);
-
-            if (DocumentDomainModel == null)
-            {
-                return NotFound($"Document with id: {id} not found");
-            }
-
-            var documentDto = new DocumentDto
-            {
-                FileName = DocumentDomainModel.FileName,
-                FileDescription = DocumentDomainModel.FileDescription,
-                FileSizeInBytes = DocumentDomainModel.FileSizeInBytes
-            };
-
-            return Ok(documentDto);
-        }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var dokumentModel = await DocumentRepository.DeleteAsync(id);
+            var dokumentModel = await _mediator.Send(new DeleteDocumentCommand(id));
 
-            if (dokumentModel == null)
-            {
-                throw new Exception($"Document with id: {id} not found");
-            }
-
-            return Ok( "Document deleted successfully");
+            return Ok(dokumentModel);
         }
 
-
-        private void ValidateFileUpload(DocumentUploadRequestDto request)
-        {
-            var allowedExtensions = new string[] { ".jpg", ".jpeg", ".pdf", ".png" };
-
-            if(allowedExtensions.Contains(Path.GetExtension(request.File.FileName)) == false)
-            {
-                ModelState.AddModelError("File", "Only .jpg, .jpeg, .pdf");
-            }
-            if(request.File.Length > 10385760)
-            {
-                ModelState.AddModelError("File", "File size cannot exceed 10MB");
-            }
-        }
     }
 }

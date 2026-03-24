@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using OCR.Application.Abstractions;
 using OCR.Application.Common.Exceptions;
 using OCR.Domain.Entities;
-using OCR.Domain.ValueObjects;
 
 namespace OCR.Application.Features.Ocr.Commands.ConfirmPatient
 {
@@ -24,8 +23,6 @@ namespace OCR.Application.Features.Ocr.Commands.ConfirmPatient
             _recognizeTextRepository = recognizeTextRepository;
         }
 
-        public IRecognizeTextRepository RecognizeTextRepository { get; }
-
         public async Task<ConfirmPatientResult> Handle(ConfirmPatientCommand request, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Patient confirmation request received. ExistingPatientId: {request.ExistingPatientId}");
@@ -38,10 +35,8 @@ namespace OCR.Application.Features.Ocr.Commands.ConfirmPatient
                 patient = await _patientRepository.GetByIdAsync(request.ExistingPatientId.Value);
                 if (patient == null)
                 {
-                    
-                    //error
+
                     throw new NotFoundException(nameof(patient), request.ExistingPatientId.Value);
-                    _logger.LogInformation($"Using existing patient: {patient.Id}");
                 }
 
 
@@ -75,7 +70,7 @@ namespace OCR.Application.Features.Ocr.Commands.ConfirmPatient
 
             try
             {
-                await RecognizeTextRepository.SaveRecognizedTextAsync(recognizeText);
+                await _recognizeTextRepository.SaveRecognizedTextAsync(recognizeText);
             }
             catch (Exception ex)
             {
