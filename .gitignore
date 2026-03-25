@@ -61,7 +61,9 @@ nunit-*.xml
 secrets.json
 
 # Ігноруємо всі файли всередині Documents
-/Documents/*
+Documents/
 
 # Але зберігаємо саму папку Documents
 !Documents/.gitkeep
+
+Migrations/

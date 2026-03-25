@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using OCR.Application.DTOs;
 
-namespace OCR.Application.Features.Ocr.Commands.ConfirmPatient
+namespace OCR.Application.Features.Ocr.Commands.SaveMedicalRecord
 {
-    public record ConfirmPatientCommand
+    public record SaveMedicalRecordCommand
     (
         Guid? ExistingPatientId,
         string FirstName,
@@ -11,13 +11,13 @@ namespace OCR.Application.Features.Ocr.Commands.ConfirmPatient
         DateOnly? BirthDate,
         Guid RecognizedId,
         RecognizedDataDto RecognizedData
-    ) : IRequest<ConfirmPatientResult>;
+    ) : IRequest<SaveMedicalRecordResult>;
 
-    public record ConfirmPatientResult
+    public record SaveMedicalRecordResult
     (
         Guid Id,
         string FirstName,
-        string LastName,
+        string? LastName,
         DateOnly? BirthDate
     );
 

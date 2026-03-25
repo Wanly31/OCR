@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OCR.Application.Features.Ocr.Commands.ConfirmPatient;
+using OCR.Application.Features.Ocr.Commands.SaveMedicalRecord;
 using OCR.Application.Features.Ocr.Commands.UploadAndRecognizeDocument;
 using OCR.Application.Features.Ocr.Quaries.GetRecognizeResultById;
 
@@ -24,8 +24,8 @@ namespace OCR.Host.Controllers
             return Ok(result);
         }
 
-        [HttpPost("ConfirmPatient")]
-        public async Task<IActionResult> ConfirmPatient([FromBody] ConfirmPatientCommand command)
+        [HttpPost("SaveMedicalRecord")]
+        public async Task<IActionResult> SaveMedicalRecord([FromBody] SaveMedicalRecordCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(result);

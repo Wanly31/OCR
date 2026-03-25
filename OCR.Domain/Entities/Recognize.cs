@@ -1,4 +1,6 @@
-﻿namespace OCR.Domain.Entities
+﻿using OCR.Domain.Enums;
+
+namespace OCR.Domain.Entities
 {
     public class Recognize
     {
@@ -7,6 +9,7 @@
 
         public Guid DocumentId { get; set; }
         public Document Document { get; set; }
+        public RecordStatus Status { get; set; }
 
         public RecognizeText? RecognizedDocument { get; set; }
     }

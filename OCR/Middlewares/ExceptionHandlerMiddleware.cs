@@ -60,7 +60,7 @@ namespace OCR.Middlewares
                     ErrorMessage = "Something went wrong! We are looking into resolving this."
                 };
 
-                await httpContext.Response.WriteAsJsonAsync(error); 
+                await httpContext.Response.WriteAsJsonAsync(error);
             }
         }
     }

@@ -39,7 +39,7 @@ public class UploadAndRecognizeDocumentCommandHandler
     }
 
     public async Task<UploadAndRecognizeDocumentResult> Handle(
-        UploadAndRecognizeDocumentCommand request, CancellationToken ct)
+        UploadAndRecognizeDocumentCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting file upload and OCR processing");
 
@@ -90,64 +90,59 @@ public class UploadAndRecognizeDocumentCommandHandler
             extractedData.BirthDate
         );
 
-        if (similarPatients.Any())
-        {
-            _logger.LogInformation("Found {Count} similar patients", similarPatients.Count);
-            var similarPatientDtos = similarPatients.Select(p => new SimilarPatientDto
+        var similarPatientDtos = similarPatients.Any()
+            ? similarPatients.Select(p => new SimilarPatientDto
             {
                 Id = p.Id,
                 FirstName = p.FirstName,
                 LastName = p.LastName,
                 BirthDate = p.BirthDate,
                 RecordCount = p.MedicalRecords?.Count ?? 0
-            });
+            })
+            : null;
 
-
-            // Повертаємо інформацію, що потрібне підтвердження (RequiresConfirmation = true)
-            return new UploadAndRecognizeDocumentResult(
-                RequiresConfirmation: true,
-                RecognizedId: recognizeResult.Id,
-                RecognizeData: extractedData,
-                SimilarPatients: similarPatientDtos
-            );
-        }
-            
-        //ДОРОБИТИ: Зупинитися, дати користувачу редагувати інформацію
-
-
-        // 7. Якщо пацієнтів не знайдено - створюємо нового
-        var newPatient = await _patientRepo.CreateAsync(new Patient
-        {
-            FirstName = extractedData.FirstName ?? "Unknown",
-            LastName = extractedData.LastName,
-            BirthDate = extractedData.BirthDate
-        });
-
-        // 8. Створюємо фінальний медичний запис і підв'язуємо до нового пацієнта
-        var recognizeTextDomain = new RecognizeText
-        {
-            Id = Guid.NewGuid(),
-            PatientId = newPatient.Id,
-            Examination = extractedData.Examination,
-            Medicine = extractedData.Medicine,
-            Treatment = extractedData.Treatment,
-            ContraindicatedMedicine = extractedData.ContraindicatedMedicine,
-            ContraindicatedReason = extractedData.ContraindicatedReason,
-            DateDocument = extractedData.DateDocument,
-            CreatedAt = DateTime.UtcNow,
-            RecognizedTextId = recognizeResult.Id
-        };
-
-        await _recognizeTextRepo.SaveRecognizedTextAsync(recognizeTextDomain);
-
-        _logger.LogInformation("Successfully completed document processing for new patient {PatientId}", newPatient.Id);
-
-        // Повертаємо успішний результат без потреби підтвердження
         return new UploadAndRecognizeDocumentResult(
-            RequiresConfirmation: false,
+            RequiresConfirmation: true,
             RecognizedId: recognizeResult.Id,
             RecognizeData: extractedData,
-            SimilarPatients: null
+            RecordStatus: Domain.Enums.RecordStatus.Pending,
+            SimilarPatients: similarPatientDtos,
+            FilePath: savedFilePath
         );
+
+        // 7. Якщо пацієнтів не знайдено - створюємо нового
+        //var newPatient = await _patientRepo.CreateAsync(new Patient
+        //{
+        //    FirstName = extractedData.FirstName ?? "Unknown",
+        //    LastName = extractedData.LastName,
+        //    BirthDate = extractedData.BirthDate
+        //});
+
+        // 8. Створюємо фінальний медичний запис і підв'язуємо до нового пацієнта
+        //var recognizeTextDomain = new RecognizeText
+        //{
+        //    Id = Guid.NewGuid(),
+        //    PatientId = newPatient.Id,
+        //    Examination = extractedData.Examination,
+        //    Medicine = extractedData.Medicine,
+        //    Treatment = extractedData.Treatment,
+        //    ContraindicatedMedicine = extractedData.ContraindicatedMedicine,
+        //    ContraindicatedReason = extractedData.ContraindicatedReason,
+        //    DateDocument = extractedData.DateDocument,
+        //    CreatedAt = DateTime.UtcNow,
+        //    RecognizedTextId = recognizeResult.Id
+        //};
+
+        //await _recognizeTextRepo.SaveRecognizedTextAsync(recognizeTextDomain);
+
+        //_logger.LogInformation("Successfully completed document processing for new patient {PatientId}", newPatient.Id);
+
+        // Повертаємо успішний результат без потреби підтвердження
+        //return new UploadAndRecognizeDocumentResult(
+        //  RequiresConfirmation: true,
+        //RecognizedId: recognizeResult.Id,
+        // RecognizeData: extractedData,
+        // SimilarPatients: null
+        //);
     }
 }

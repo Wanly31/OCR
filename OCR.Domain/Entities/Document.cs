@@ -1,3 +1,5 @@
+using OCR.Domain.Enums;
+
 namespace OCR.Domain.Entities
 {
     public class Document
@@ -10,5 +12,6 @@ namespace OCR.Domain.Entities
         public string FilePath { get; set; }
 
         public Recognize? RecognizedText { get; set; }
+        public RecordStatus Status { get; set; }
     }
 }
