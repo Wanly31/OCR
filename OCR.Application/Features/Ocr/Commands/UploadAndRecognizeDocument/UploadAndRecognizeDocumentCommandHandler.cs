@@ -109,40 +109,5 @@ public class UploadAndRecognizeDocumentCommandHandler
             SimilarPatients: similarPatientDtos,
             FilePath: savedFilePath
         );
-
-        // 7. Якщо пацієнтів не знайдено - створюємо нового
-        //var newPatient = await _patientRepo.CreateAsync(new Patient
-        //{
-        //    FirstName = extractedData.FirstName ?? "Unknown",
-        //    LastName = extractedData.LastName,
-        //    BirthDate = extractedData.BirthDate
-        //});
-
-        // 8. Створюємо фінальний медичний запис і підв'язуємо до нового пацієнта
-        //var recognizeTextDomain = new RecognizeText
-        //{
-        //    Id = Guid.NewGuid(),
-        //    PatientId = newPatient.Id,
-        //    Examination = extractedData.Examination,
-        //    Medicine = extractedData.Medicine,
-        //    Treatment = extractedData.Treatment,
-        //    ContraindicatedMedicine = extractedData.ContraindicatedMedicine,
-        //    ContraindicatedReason = extractedData.ContraindicatedReason,
-        //    DateDocument = extractedData.DateDocument,
-        //    CreatedAt = DateTime.UtcNow,
-        //    RecognizedTextId = recognizeResult.Id
-        //};
-
-        //await _recognizeTextRepo.SaveRecognizedTextAsync(recognizeTextDomain);
-
-        //_logger.LogInformation("Successfully completed document processing for new patient {PatientId}", newPatient.Id);
-
-        // Повертаємо успішний результат без потреби підтвердження
-        //return new UploadAndRecognizeDocumentResult(
-        //  RequiresConfirmation: true,
-        //RecognizedId: recognizeResult.Id,
-        // RecognizeData: extractedData,
-        // SimilarPatients: null
-        //);
     }
 }

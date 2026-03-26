@@ -36,9 +36,11 @@ namespace OCR.Infrastructure.Repositories
             return await text.ToListAsync();
         }
 
-        public async Task<Document?> GetByIdAsync(Guid id)
+        public async Task<Recognize?> GetByIdAsync(Guid id)
         {
-            return await dbContext.Documents.FirstOrDefaultAsync(x => x.Id == id);
+            return await dbContext.RecognizedTexts
+                .Include(r => r.RecognizedDocument)
+                .FirstOrDefaultAsync(x => x.DocumentId == id);
         }
 
         public async Task<Recognize> GetByIdTextAsync(Guid id)

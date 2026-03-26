@@ -96,5 +96,19 @@ namespace OCR.Infrastructure.Repositories
 
             return existing;
         }
+
+        public async Task<Patient> DeleteAsync(Guid id)
+            
+        {
+            var existingPatient = await _dbContext.Patients.FirstOrDefaultAsync(x => x.Id == id);
+            if (existingPatient == null)
+            {
+                return null;
+            }
+
+            _dbContext.Patients.Remove(existingPatient);
+            await _dbContext.SaveChangesAsync();
+            return existingPatient;
+        }
     }
 }

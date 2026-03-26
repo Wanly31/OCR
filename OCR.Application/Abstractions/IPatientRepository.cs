@@ -9,5 +9,6 @@ namespace OCR.Application.Abstractions
         Task<List<RecognizeText>> GetPatientHistoryAsync(Guid patientId);
         Task<Patient> CreateAsync(Patient patient);
         Task<Patient?> UpdateAsync(Guid id, Patient patient);
+        Task<Patient> DeleteAsync(Guid id);
     }
 }

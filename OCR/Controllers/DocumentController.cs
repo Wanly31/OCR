@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using OCR.Domain.Entities;
-using OCR.Application.DTOs;
-using OCR.Application.Abstractions;
 using MediatR;
 using OCR.Application.Features.Documents.Commands.DeleteDocument;
+using OCR.Application.Features.Documents.Queries.GetDocumentFile;
 
 namespace OCR.Host.Controllers
 {
@@ -13,43 +11,26 @@ namespace OCR.Host.Controllers
     {
         private readonly IMediator _mediator;
 
-        public DocumentController(IDocumentRepository documentRepository, IMediator mediator)
+        public DocumentController(IMediator mediator)
         {
-            DocumentRepository = documentRepository;
             _mediator = mediator;
         }
-
-        public IDocumentRepository DocumentRepository { get; }
 
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var document = await DocumentRepository.GetByIdAsync(id);
-            
-            if (document == null)
-            {
-                    return NotFound($"Document with id: {id} not found");
-             
-            }
+            var documentModel = await _mediator.Send(new GetDocumentFileQuery(id));
 
-            var documentDto = new DocumentDto
-            {
-                Id = document.Id,
-                FileName = document.FileName,
-                FileDescription = document.FileDescription,
-                FileSizeInBytes = document.FileSizeInBytes
-            };
-
-            return Ok(documentDto);
+            return Ok(documentModel);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var dokumentModel = await _mediator.Send(new DeleteDocumentCommand(id));
+            var documentModel = await _mediator.Send(new DeleteDocumentCommand(id));
 
-            return Ok(dokumentModel);
+            return Ok(documentModel);
         }
 
     }

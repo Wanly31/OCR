@@ -6,7 +6,6 @@ using OCR.Application.Common.Exceptions;
 namespace OCR.Application.Features.Auth.RegisterUser
 {
 
-
     public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, RegisterUserResult>
     {
 

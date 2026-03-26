@@ -37,5 +37,6 @@ namespace OCR.Host.Controllers
             var result = await _mediator.Send(new GetRecognizeResultByIdQuery(Id));
             return Ok(result);
         }
+
     }
 }
