@@ -1,22 +1,21 @@
-﻿
-using MediatR;
-using Microsoft.Extensions.Logging;
+﻿using MediatR;
 using OCR.Application.Abstractions;
-using OCR.Application.DTOs;
 
 namespace OCR.Application.Features.Patients.Quaries.SearchPatients
 {
-    public class SearchPatientQueryHandler : IRequestHandler<SearchPatientQuery, IEnumerable<SearchPatientsResult>>
+    public class SearchPatientQueryHandler
+    : IRequestHandler<SearchPatientQuery, PaginatedResult<SearchPatientsResult>>
     {
         private readonly IPatientRepository _patientRepository;
-
 
         public SearchPatientQueryHandler(IPatientRepository patientRepository)
         {
             _patientRepository = patientRepository;
         }
 
-        public async Task<IEnumerable<SearchPatientsResult>> Handle(SearchPatientQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedResult<SearchPatientsResult>> Handle(
+            SearchPatientQuery request,
+            CancellationToken cancellationToken)
         {
             var patients = await _patientRepository.SearchSimilarAsync(
                 request.FirstName,
@@ -24,7 +23,13 @@ namespace OCR.Application.Features.Patients.Quaries.SearchPatients
                 request.BirthDate
             );
 
-            var response = patients.Select(p => new SearchPatientsResult
+            var totalCount = patients.Count();
+
+            var pagedPatients = patients
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize);
+
+            var items = pagedPatients.Select(p => new SearchPatientsResult
             (
                 Id: p.Id,
                 FirstName: p.FirstName,
@@ -33,7 +38,12 @@ namespace OCR.Application.Features.Patients.Quaries.SearchPatients
                 TotalRecords: p.MedicalRecords?.Count ?? 0
             ));
 
-            return response;
+            return new PaginatedResult<SearchPatientsResult>(
+                Items: items,
+                TotalCount: totalCount,
+                Page: request.Page,
+                PageSize: request.PageSize
+            );
         }
     }
 }

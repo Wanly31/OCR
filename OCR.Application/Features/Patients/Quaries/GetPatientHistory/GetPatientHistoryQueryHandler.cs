@@ -17,6 +17,7 @@ namespace OCR.Application.Features.Patients.Quaries.GetPatientHistory
         {
             var records = await _patientRepository.GetPatientHistoryAsync(request.id);
 
+
             return records.Select(rt => new GetPatientHistoryResult(
                 Id: rt.Id,
                 PatientId: rt.PatientId,
