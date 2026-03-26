@@ -5,7 +5,20 @@ using OCR.Host.Extensions;
 using OCR.Application;
 using OCR.Middlewares;
 
+var MyAllowSpecifiOrigin = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecifiOrigin,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+        });
+});
 
 //add Logger
 var logger = new LoggerConfiguration()
@@ -26,6 +39,7 @@ var app = builder.Build();
 
 app.UseSwaggerMiddleware();
 app.UseHttpsRedirection();
+app.UseCors(MyAllowSpecifiOrigin);
 
 app.UseAuthentication();
 app.UseAuthorization();

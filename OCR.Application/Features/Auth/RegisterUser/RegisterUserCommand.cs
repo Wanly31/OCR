@@ -5,12 +5,11 @@ namespace OCR.Application.Features.Auth.RegisterUser
     public record RegisterUserCommand
     (
         string Username,
-        string Password,
-        string Roles
+        string Password
     ) : IRequest<RegisterUserResult>;
 
     public record RegisterUserResult
     (
-        string Username
+        string _jwtToken
     );
 }

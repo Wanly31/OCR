@@ -30,13 +30,8 @@ namespace OCR.Application.Features.Ocr.Commands.SaveMedicalRecord
         public async Task<SaveMedicalRecordResult> Handle(SaveMedicalRecordCommand request, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-    "Patient confirmation request received. ExistingPatientId: {ExistingPatientId}",
-    request.ExistingPatientId);
-
-
-            //Fix: ApplicationException(need to add BadRequestException)
-            if (request.RecognizedData == null)
-                throw new ApplicationException("Recognized data is required");
+                "Patient confirmation request received. ExistingPatientId: {ExistingPatientId}",
+                request.ExistingPatientId);
 
             Patient patient;
 
