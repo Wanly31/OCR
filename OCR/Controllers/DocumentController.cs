@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using OCR.Application.Features.Documents.Commands.DeleteDocument;
-using OCR.Application.Features.Documents.Queries.GetDocumentFile;
+using OCR.Application.Features.Documents.Queries.GetDocumentStream;
 
 namespace OCR.Host.Controllers
 {
@@ -17,12 +17,11 @@ namespace OCR.Host.Controllers
         }
 
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet("{id}/file")]
+        public async Task<IActionResult> GetFile(Guid id)
         {
-            var documentModel = await _mediator.Send(new GetDocumentFileQuery(id));
-
-            return Ok(documentModel);
+            var result = await _mediator.Send(new GetDocumentStreamQuery(id));
+            return File(result.FileStream, result.ContentType, result.FileName);
         }
 
         [HttpDelete("{id}")]
