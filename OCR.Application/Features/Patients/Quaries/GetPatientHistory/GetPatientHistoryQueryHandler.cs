@@ -21,8 +21,8 @@ namespace OCR.Application.Features.Patients.Quaries.GetPatientHistory
             return records.Select(rt => new GetPatientHistoryResult(
                 Id: rt.Id,
                 PatientId: rt.PatientId,
-                FirstName: rt.Patient?.FirstName,
-                LastName: rt.Patient?.LastName,
+                FirstName: rt.Patient.FirstName,
+                LastName: rt.Patient.LastName,
                 Examination: rt.Examination,
                 Medicine: rt.Medicine,
                 Treatment: rt.Treatment,

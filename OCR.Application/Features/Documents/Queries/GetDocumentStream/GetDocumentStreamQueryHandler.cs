@@ -18,11 +18,15 @@ namespace OCR.Application.Features.Documents.Queries.GetDocumentStream
             var document = await _documentRepository.GetByIdAsync(request.Id);
 
             if (document == null)
+            {
                 throw new NotFoundException("Document not found, id: ", request.Id);
-
+            }
+            
             if (!File.Exists(document.FilePath))
+            {
                 throw new NotFoundException("File not found on disk, id: ", request.Id);
-
+            }
+            
             var contentType = GetContentType(document.FileExtension);
             var fileStream = new FileStream(document.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
 

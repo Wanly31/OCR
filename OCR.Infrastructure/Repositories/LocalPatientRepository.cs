@@ -58,6 +58,7 @@ namespace OCR.Infrastructure.Repositories
         public async Task<List<RecognizeText>> GetPatientHistoryAsync(Guid patientId)
         {
             return await _dbContext.RecognizedDocuments
+                .Include(rt => rt.Patient)
                 .Where(rt => rt.PatientId == patientId)
                 .OrderByDescending(rt => rt.CreatedAt)
                 .ToListAsync();

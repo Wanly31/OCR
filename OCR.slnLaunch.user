@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Новый профиль",
+    "Projects": [
+      {
+        "Path": "OCR\\OCR.Host.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "OCR.WebUI\\ocr.webui.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
