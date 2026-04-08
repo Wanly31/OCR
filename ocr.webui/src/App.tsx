@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage/LoginPage'
 import RegisterPage from './pages/RegisterPage/RegisterPage'
+import UploadPage from './pages/UploadPage/UploadPage'
 
 
 function Dashboard() {
@@ -20,6 +21,7 @@ export default function App() {
           {/* Захищені — тільки після логіну */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/upload" element={<UploadPage />} />
           </Route>
           {/* Будь-який невідомий маршрут → логін */}
           <Route path="*" element={<Navigate to="/login" replace />} />
