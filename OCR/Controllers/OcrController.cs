@@ -31,7 +31,7 @@ namespace OCR.Host.Controllers
             return Ok(result);
         }
 
-        [HttpPost("GetRecognizeResultById")]
+        [HttpGet("GetRecognizeResultById")]
         public async Task<IActionResult> GetById(Guid Id)
         {
             var result = await _mediator.Send(new GetRecognizeResultByIdQuery(Id));
