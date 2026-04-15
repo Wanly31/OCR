@@ -1,14 +1,9 @@
-import axios from "axios";
+import api from './axios.config'
 import type { DocumentDto } from "../types/document.types";
 
-const api = axios.create({
-    baseURL: '/api/Document', // Базовий роут згідно DocumentController.cs
-});
-
 // GET /api/Document/{id}/file
-// Бекенд повертає БІНАРНИЙ файл (FileResult), тому вказуємо responseType: 'blob'
 export const getDocumentStream = async (documentId: string): Promise<Blob> => {
-    const response = await api.get<Blob>(`/${documentId}/file`, {
+    const response = await api.get<Blob>(`/Document/${documentId}/file`, {
         responseType: 'blob' 
     });
     return response.data;
@@ -16,6 +11,6 @@ export const getDocumentStream = async (documentId: string): Promise<Blob> => {
 
 // DELETE /api/Document/{id}
 export const deleteDocument = async (documentId: string): Promise<DocumentDto> => {
-    const response = await api.delete<DocumentDto>(`/${documentId}`);
+    const response = await api.delete<DocumentDto>(`/Document/${documentId}`);
     return response.data;
 };

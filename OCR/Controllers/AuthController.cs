@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OCR.Application.Features.Auth.RegisterUser;
 using MediatR;
@@ -7,6 +9,7 @@ namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -18,6 +21,8 @@ namespace OCR.Host.Controllers
 
         [HttpPost]
         [Route("Register")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
             var result = await _mediator.Send(command);
@@ -26,7 +31,9 @@ namespace OCR.Host.Controllers
 
         [HttpPost]
         [Route("Login")]
-
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
         {
             var result = await _mediator.Send(command);

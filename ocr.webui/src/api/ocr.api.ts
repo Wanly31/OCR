@@ -1,10 +1,6 @@
-import axios from 'axios';
+import api from './axios.config';
 
 import type { OcrRequest, OcrResult, SaveMedicalRecordRequest, SaveMedicalRecordResult } from '../types/ocr.types';
-
-const api = axios.create({
-    baseURL: '/api',
-})
 
 export const performOcr = async (data: OcrRequest): Promise<OcrResult> => {
     const formData = new FormData();

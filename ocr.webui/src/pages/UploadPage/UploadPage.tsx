@@ -12,11 +12,9 @@ export default function UploadPage() {
     const [error, setError] = useState<string>('')
     const [loading, setLoading] = useState<boolean>(false)
 
-    // Коли юзер обирає файл через input
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0] ?? null
         setFile(selected)
-        // Автоматично підставляємо ім'я файлу
         if (selected) setFileName(selected.name)
     }
 
@@ -36,8 +34,6 @@ export default function UploadPage() {
                 FileDescription: fileDescription || undefined,
             })
 
-            // Передаємо результат на ReviewPage через router state
-            // На ReviewPage отримаємо через: useLocation().state
             navigate('/review', { state: { result } })
         } catch (err: any) {
             setError(err.response?.data?.message ?? 'Помилка розпізнавання')

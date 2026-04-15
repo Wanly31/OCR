@@ -1,0 +1,152 @@
+.page {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.header {}
+.title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 0.4rem;
+}
+.subtitle {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.55;
+    max-width: 580px;
+}
+
+/* Info Grid */
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+.infoCard {
+    background: rgba(30,41,59,0.9);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: border-color 0.2s;
+}
+.infoCard:hover {
+    border-color: rgba(99,102,241,0.3);
+}
+.infoIcon {
+    font-size: 2rem;
+    display: block;
+}
+.infoCard h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+}
+.infoCard p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.55;
+    flex: 1;
+}
+.actionBtn {
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    transition: opacity 0.2s, transform 0.15s;
+    align-self: flex-start;
+    margin-top: 0.25rem;
+}
+.actionBtn:hover:not(:disabled) {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+.actionBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.docIdForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.25rem;
+}
+.docIdForm input {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #f1f5f9;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: monospace;
+}
+.docIdForm input:focus {
+    border-color: #6366f1;
+}
+
+/* API Note */
+.apiNote {
+    background: rgba(15,23,42,0.7);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+.apiNote h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #94a3b8;
+    margin: 0 0 1rem;
+}
+.endpoints {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.endpoint {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+.method {
+    background: rgba(6,182,212,0.15);
+    border: 1px solid rgba(6,182,212,0.3);
+    border-radius: 6px;
+    color: #06b6d4;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+.delete {
+    background: rgba(239,68,68,0.12);
+    border-color: rgba(239,68,68,0.3);
+    color: #f87171;
+}
+.endpoint code {
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-family: monospace;
+    font-size: 0.82rem;
+    padding: 0.2rem 0.55rem;
+}
+.endpointDesc {
+    color: #64748b;
+    font-size: 0.82rem;
+}

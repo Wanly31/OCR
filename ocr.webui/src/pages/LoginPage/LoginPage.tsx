@@ -32,14 +32,11 @@ export default function LoginPage(){
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        {/* Заголовок */}
         <div className={styles.header}>
           <h1 className={styles.title}>Вхід в систему</h1>
           <p className={styles.subtitle}>OCR Medical Document System</p>
         </div>
-        {/* Форма */}
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Поле логін */}
           <div className={styles.field}>
             <label htmlFor="username">Логін</label>
             <input
@@ -47,11 +44,10 @@ export default function LoginPage(){
               type="text"
               placeholder="Введіть логін"
               value={username}
-              onChange={e => setUsername(e.target.value)} // оновлення стану при друці
+              onChange={e => setUsername(e.target.value)}
               required
             />
           </div>
-          {/* Поле пароль */}
           <div className={styles.field}>
             <label htmlFor="password">Пароль</label>
             <input
@@ -63,9 +59,7 @@ export default function LoginPage(){
               required
             />
           </div>
-          {/* Помилка */}
           {error && <p className={styles.error}>{error}</p>}
-          {/* Кнопка */}
           <button
             type="submit"
             className={styles.button}
@@ -74,7 +68,6 @@ export default function LoginPage(){
             {loading ? 'Вхід...' : 'Увійти'}
           </button>
         </form>
-        {/* Посилання на реєстрацію */}
         <p className={styles.link}>
           Немає акаунту? <Link to="/register">Зареєструватись</Link>
         </p>

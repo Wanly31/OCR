@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using OCR.Application.Features.Patients.Quaries.GetPatientById;
@@ -8,6 +10,7 @@ namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PatientController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -19,6 +22,7 @@ namespace OCR.Host.Controllers
 
         // POST /api/Patient/search
         [HttpPost("search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchSimilar([FromBody] SearchPatientQuery quaries)
         {
             var result = await _mediator.Send(quaries);
@@ -27,6 +31,8 @@ namespace OCR.Host.Controllers
 
         // GET /api/Patient/{id}
         [HttpGet("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _mediator.Send(new GetPatientByIdQuery(id));
@@ -35,6 +41,8 @@ namespace OCR.Host.Controllers
 
         // GET /api/Patient/{id}/history
         [HttpGet("{id:guid}/history")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPatientHistory(Guid id)
         {
 

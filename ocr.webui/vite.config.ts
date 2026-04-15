@@ -11,6 +11,11 @@ export default defineConfig({
                 target: 'https://localhost:7241',
                 changeOrigin: true,
                 secure: false, // дозволяє self-signed HTTPS сертифікат від VS
+            },
+            '/Documents': {
+                target: 'https://localhost:7241',
+                changeOrigin: true,
+                secure: false,
             }
         }
     }
