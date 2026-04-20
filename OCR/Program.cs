@@ -43,9 +43,16 @@ app.UseCors(MyAllowSpecifiOrigin);
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+var documentsPath = Path.Combine(Directory.GetCurrentDirectory(), "Documents");
+if (!Directory.Exists(documentsPath))
+{
+    Directory.CreateDirectory(documentsPath);
+}
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Documents")),
+    FileProvider = new PhysicalFileProvider(documentsPath),
     RequestPath = "/Documents"
     //https://localhost:7242/Images/filename.jpg
 });
@@ -54,3 +61,4 @@ app.MapControllers();
 
 await app.RunAsync();
 
+public partial class Program { }

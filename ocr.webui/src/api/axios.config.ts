@@ -22,9 +22,6 @@ api.interceptors.response.use(
     (error) => {
         if (error.response && error.response.status === 401) {
             console.warn('Unauthorized. Token might be expired.');
-            // Optionally dispatch a logout event or clear localStorage
-            // localStorage.removeItem('jwt_token');
-            // window.location.href = '/login';
         }
         return Promise.reject(error);
     }
