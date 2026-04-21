@@ -48,7 +48,6 @@ namespace OCR.Infrastructure.Services
             return result;
         }
 
-
         /// <summary>
         /// Extracts general entities such as person name and birth date from text.
         /// </summary>
@@ -60,49 +59,70 @@ namespace OCR.Infrastructure.Services
             {
                 var response = await _textAnalyticsClient.RecognizeEntitiesAsync(text);
 
-                var personEntity = response.Value.FirstOrDefault(e => e.Category == EntityCategory.Person);
+                var personEntity = response.Value
+                    .Where(e => e.Category == EntityCategory.Person && e.ConfidenceScore >= 0.70)
+                    .OrderByDescending(e => e.ConfidenceScore)
+                    .FirstOrDefault();
 
                 if (!string.IsNullOrEmpty(personEntity.Text))
                 {
-                    var nameParts = personEntity.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    result.FirstName = nameParts.FirstOrDefault();
-                    result.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : null;
-                    
-                    _logger.LogInformation($"Extracted name: {result.FirstName} {result.LastName}");
+                    //var nameParts = personEntity.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    //result.FirstName = nameParts.FirstOrDefault();
+                    //result.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : null;
+
+                    var (firstName, lastName) = SplitMedicalName(personEntity.Text);
+
+                    result.FirstName = firstName;
+                    result.LastName = lastName;
+
+                    _logger.LogInformation("Extracted name: {FirstName} {LastName}", result.FirstName, result.LastName);
                 }
                 else
                 {
                     _logger.LogInformation("No person entities found.");
                 }
 
-                
-                var dobEntity = response.Value.FirstOrDefault(e => e.Category == EntityCategory.DateTime);
+                var dobKeywords = new[] { "народження", "DOB", "born", "birth", "народився", "д.н." };
                 var dateFormats = new[] { "dd.MM.yyyy", "d.M.yyyy", "yyyy-MM-dd", "MM/dd/yyyy", "d MMMM yyyy" };
-                
+
+                var dobEntity = response.Value
+                    .Where(e => e.Category == EntityCategory.DateTime && !string.IsNullOrEmpty(e.Text))
+                    .Where(e =>
+                    {
+                        int start = Math.Max(0, e.Offset - 40);
+                        int length = Math.Min(60, text.Length - start);
+                        var context = text.Substring(start, length);
+                        return dobKeywords.Any(k => context.Contains(k, StringComparison.OrdinalIgnoreCase));
+                    })
+                    .OrderByDescending(e => e.ConfidenceScore)
+                    .FirstOrDefault();
+                if (string.IsNullOrEmpty(dobEntity.Text))
+                {
+                    _logger.LogInformation("No DateOfBirth entity found near DOB keywords.");
+                    return;
+                }
+
                 if (DateTime.TryParseExact(dobEntity.Text, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
                 {
                     result.BirthDate = DateOnly.FromDateTime(parsedDate);
-
-                    _logger.LogInformation($"Extracted date: {parsedDate}");
+                    _logger.LogInformation("Extracted birth date (exact): {Date}", parsedDate);
                 }
-                else if (DateTime.TryParse(dobEntity.Text, out var fallbackDate))
+                else if (DateTime.TryParse(dobEntity.Text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var fallbackDate))
                 {
                     result.BirthDate = DateOnly.FromDateTime(fallbackDate);
-
-                    _logger.LogInformation($"Extracted date: {fallbackDate}");
+                    _logger.LogInformation("Extracted birth date (fallback): {Date}", fallbackDate);
                 }
-
                 else
                 {
-                    _logger.LogInformation("No DateOfBirth entities found.");
+                    _logger.LogWarning("Found DateTime entity '{Text}' near DOB keyword but failed to parse.", dobEntity.Text);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Entity extraction failed: {ex.Message}");
+                _logger.LogError(ex, "Entity extraction failed.");
             }
         }
-       
+
         /// <summary>
         /// Extracts healthcare-related entities such as medications, treatments and examinations.
         /// Also filters contraindicated medicines.
@@ -121,11 +141,10 @@ namespace OCR.Infrastructure.Services
                 var treatments = new List<string>();
                 var examination = new List<string>();
 
-                // Medications detected as contraindicated via Azure assertions (primary method)
                 var assertionContraindicatedMeds = new List<string>();
-
-                // All detected medications with offsets - used for regex fallback
                 var allExtractedMedications = new List<(string Text, int Offset)>();
+
+                var medicationsWithoutAssertion = new List<(string Text, int Offset)>();
 
                 await foreach (var docPage in healthOp.GetValuesAsync())
                 {
@@ -133,17 +152,17 @@ namespace OCR.Infrastructure.Services
                     {
                         if (doc.HasError)
                         {
-                            _logger.LogWarning($"Healthcare entity recognition error: {doc.Error.Message}");
+                            _logger.LogWarning("Healthcare entity recognition error: {Error}", doc.Error.Message);
                             continue;
                         }
 
-                        // --- Step 1: Classify all entities via Azure Assertion (primary detection) ---
+                        // Step 1: Classify via Azure Assertion
                         foreach (var entity in doc.Entities)
                         {
-                            // Skip low-confidence results
-                            if (entity.ConfidenceScore < 0.70)
+                            if (entity.ConfidenceScore < 0.80)
                             {
-                                _logger.LogDebug($"Skipping low-confidence entity '{entity.Text}' ({entity.ConfidenceScore:P0})");
+                                _logger.LogDebug("Skipping low-confidence entity '{Text}' ({Score:P0})",
+                                    entity.Text, entity.ConfidenceScore);
                                 continue;
                             }
 
@@ -151,37 +170,36 @@ namespace OCR.Infrastructure.Services
                             {
                                 allExtractedMedications.Add((entity.Text, entity.Offset));
 
-                                // Primary: use Azure's semantic negation/association tags
-                                bool isContraindicated = IsContraindicatedByAssertion(entity);
-
-                                if (isContraindicated)
+                                if (IsContraindicatedByAssertion(entity))
                                 {
                                     assertionContraindicatedMeds.Add(entity.Text);
-                                    _logger.LogInformation($"[Assertion] Contraindicated medicine detected: '{entity.Text}' (Certainty={entity.Assertion?.Certainty}, Association={entity.Assertion?.Association})");
+                                    _logger.LogInformation(
+                                        "[Assertion] Contraindicated: '{Text}' (Certainty={Certainty}, Association={Association})",
+                                        entity.Text, entity.Assertion?.Certainty, entity.Assertion?.Association);
                                 }
                                 else
                                 {
                                     medications.Add(entity.Text);
-                                    _logger.LogInformation($"Extracted medicine: '{entity.Text}'");
+                                    _logger.LogInformation("Extracted medicine: '{Text}'", entity.Text);
+
+                                    if (entity.Assertion == null)
+                                        medicationsWithoutAssertion.Add((entity.Text, entity.Offset));
                                 }
                             }
                             else if (entity.Category == HealthcareEntityCategory.TreatmentName)
                             {
                                 treatments.Add(entity.Text);
-                                _logger.LogInformation($"Extracted treatment: '{entity.Text}'");
+                                _logger.LogInformation("Extracted treatment: '{Text}'", entity.Text);
                             }
                             else if (entity.Category == HealthcareEntityCategory.ExaminationName)
                             {
                                 examination.Add(entity.Text);
-                                _logger.LogInformation($"Extracted examination: '{entity.Text}'");
+                                _logger.LogInformation("Extracted examination: '{Text}'", entity.Text);
                             }
                         }
 
-                        // --- Step 2: Use EntityRelations to catch contraindications via relations ---
-                        // e.g. a medication linked to a negated condition or a contraindication context
                         foreach (var relation in doc.EntityRelations)
                         {
-                            // Look for medication entities in any relation that involves a negated role
                             var medicationRole = relation.Roles
                                 .FirstOrDefault(r => r.Entity.Category == HealthcareEntityCategory.MedicationName);
 
@@ -189,7 +207,6 @@ namespace OCR.Infrastructure.Services
 
                             var medText = medicationRole.Entity.Text;
 
-                            // If any other role in this relation is negated or "Other", upgrade the medication
                             bool relationIndicatesContraindication = relation.Roles
                                 .Where(r => r.Entity.Category != HealthcareEntityCategory.MedicationName)
                                 .Any(r =>
@@ -198,42 +215,44 @@ namespace OCR.Infrastructure.Services
                                     r.Entity.Assertion?.Association == EntityAssociation.Other);
 
                             if (relationIndicatesContraindication &&
-                                !assertionContraindicatedMeds.Contains(medText) &&
-                                medications.Contains(medText))
+                                !assertionContraindicatedMeds.Contains(medText, StringComparer.OrdinalIgnoreCase) &&
+                                medications.Contains(medText, StringComparer.OrdinalIgnoreCase))
                             {
-                                medications.Remove(medText);
+                                // RemoveAll щоб прибрати всі дублікати
+                                medications.RemoveAll(m =>
+                                    string.Equals(m, medText, StringComparison.OrdinalIgnoreCase));
+
                                 assertionContraindicatedMeds.Add(medText);
-                                _logger.LogInformation($"[Relation] Contraindicated medicine detected via entity relation: '{medText}'");
+                                _logger.LogInformation(
+                                    "[Relation] Contraindicated via relation: '{Text}'", medText);
                             }
                         }
                     }
                 }
 
-                // --- Step 3: Regex fallback — only for medications not yet classified ---
-                var unclassifiedMedications = allExtractedMedications
-                    .Where(m => !assertionContraindicatedMeds.Contains(m.Text) && !medications.Contains(m.Text))
-                    .ToList();
-
                 List<string> regexContraindicatedMeds = new();
-                if (unclassifiedMedications.Count > 0)
+                if (medicationsWithoutAssertion.Count > 0)
                 {
-                    regexContraindicatedMeds = ExtractContraindicatedMedicinesFallback(text, unclassifiedMedications, result);
-                    _logger.LogInformation($"[Regex Fallback] Found {regexContraindicatedMeds.Count} additional contraindicated medicines");
+                    regexContraindicatedMeds = ExtractContraindicatedMedicinesFallback(
+                        text, medicationsWithoutAssertion, result);
+
+                    _logger.LogInformation(
+                        "[Regex Fallback] Found {Count} additional contraindicated medicines",
+                        regexContraindicatedMeds.Count);
                 }
 
-                // Merge all contraindicated sources
                 var allContraindicatedMeds = assertionContraindicatedMeds
                     .Union(regexContraindicatedMeds)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
-                // Ensure no contraindicated med appears in regular medications
                 medications = medications
                     .Where(m => !allContraindicatedMeds.Contains(m, StringComparer.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
                 if (medications.Any())
-                    result.Medicine = string.Join(", ", medications.Distinct(StringComparer.OrdinalIgnoreCase));
+                    result.Medicine = string.Join(", ", medications);
 
                 if (treatments.Any())
                     result.Treatment = string.Join(", ", treatments.Distinct(StringComparer.OrdinalIgnoreCase));
@@ -244,12 +263,12 @@ namespace OCR.Infrastructure.Services
                 if (allContraindicatedMeds.Any())
                 {
                     result.ContraindicatedMedicine = string.Join(", ", allContraindicatedMeds);
-                    _logger.LogInformation($"Final contraindicated medicines: {result.ContraindicatedMedicine}");
+                    _logger.LogInformation("Final contraindicated medicines: {Meds}", result.ContraindicatedMedicine);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Healthcare extraction failed: {ex.Message}");
+                _logger.LogError(ex, "Healthcare extraction failed.");
             }
         }
 
@@ -273,6 +292,8 @@ namespace OCR.Infrastructure.Services
 
             return negatedCertainty || notAssociated;
         }
+
+
 
         /// <summary>
         /// Fallback: detects contraindicated medicines using regex section-matching.
@@ -353,7 +374,6 @@ namespace OCR.Infrastructure.Services
                     }
                 }
 
-                // Global reason scan (e.g. "Причина: алергія на пеніцилін")
                 var globalReasonPatterns = new[]
                 {
                     @"(?:причина протипоказань|contraindication reason|причина|reason)[\s:]+([^\r\n]{3,100})",
@@ -392,7 +412,41 @@ namespace OCR.Infrastructure.Services
                 _logger.LogError(ex, "[Regex Fallback] Failed to extract contraindicated medicines");
                 return new List<string>();
             }
+
+
         }
 
+        /// <summary>
+        /// Розділяє повне ім'я на ім'я та прізвище, враховуючи специфіку медичних документів.
+        /// </summary>
+        private (string FirstName, string LastName) SplitMedicalName(string fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
+                return (null, null);
+
+            // Очищення від зайвих символів, які часто з'являються після OCR
+            var cleanName = fullName.Trim().Replace(",", "").Replace(".", ". ");
+            var parts = cleanName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 0) return (null, null);
+            if (parts.Length == 1) return (parts[0], null);
+
+            // Евристика: у Східній Європі в документах Прізвище часто йде ПЕРШИМ (Іванов Іван)
+            // Список типових закінчень прізвищ (UA/Root)
+            string[] lastNameEndings = { "ов", "ва", "ко", "ий", "ін", "юк", "ак", "ич", "як", "ка" };
+
+            // Перевіряємо, чи перше слово схоже на прізвище
+            bool isFirstWordLastName = lastNameEndings.Any(e =>
+                parts[0].EndsWith(e, StringComparison.OrdinalIgnoreCase));
+
+            if (isFirstWordLastName)
+            {
+                // Якщо перший - прізвище, то друге - ім'я
+                return (parts[1], parts[0]);
+            }
+
+            // Стандартний західний формат (FirstName LastName)
+            return (parts[0], string.Join(" ", parts.Skip(1)));
+        }
     }
 }
