@@ -15,6 +15,7 @@ namespace OCR.Application.Features.Ocr.Commands.UploadAndRecognizeDocument
     public record UploadAndRecognizeDocumentResult(
         bool RequiresConfirmation,
         Guid RecognizedId,
+        Guid DocumentId,
         RecognizedTextResultDto RecognizeData,
         RecordStatus RecordStatus,
         string FilePath,

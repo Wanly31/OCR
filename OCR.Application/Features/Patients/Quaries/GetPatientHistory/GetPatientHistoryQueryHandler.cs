@@ -29,7 +29,8 @@ namespace OCR.Application.Features.Patients.Quaries.GetPatientHistory
                 ContraindicatedMedicine: rt.ContraindicatedMedicine,
                 ContraindicatedReason: rt.ContraindicatedReason,
                 DateDocument: rt.DateDocument,
-                CreatedAt: rt.CreatedAt
+                CreatedAt: rt.CreatedAt,
+                DocumentId: rt.RecognizedText.DocumentId
             ));
         }
     }

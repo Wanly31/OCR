@@ -7,7 +7,7 @@ namespace OCR.Application.Features.Documents.Queries.GetDocumentStream
     public class GetDocumentStreamQueryHandler : IRequestHandler<GetDocumentStreamQuery, DocumentStreamResult>
     {
         private readonly IDocumentRepository _documentRepository;
-
+        
         public GetDocumentStreamQueryHandler(IDocumentRepository documentRepository)
         {
             _documentRepository = documentRepository;
@@ -26,15 +26,23 @@ namespace OCR.Application.Features.Documents.Queries.GetDocumentStream
             {
                 throw new NotFoundException("File not found on disk, id: ", request.Id);
             }
-            
+            // будуй повний шлях динамічно
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "Documents", document.FilePath);
+
+            if (!File.Exists(fullPath))
+                throw new NotFoundException("File not found on disk, id: ", request.Id);
+
+            var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
             var contentType = GetContentType(document.FileExtension);
-            var fileStream = new FileStream(document.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
 
             return new DocumentStreamResult(
                 FileStream: fileStream,
                 ContentType: contentType,
                 FileName: document.FileName
             );
+
+
+
         }
 
         private static string GetContentType(string extension)

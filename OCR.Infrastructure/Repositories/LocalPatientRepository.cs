@@ -59,6 +59,7 @@ namespace OCR.Infrastructure.Repositories
         {
             return await _dbContext.RecognizedDocuments
                 .Include(rt => rt.Patient)
+                .Include(rt => rt.RecognizedText)
                 .Where(rt => rt.PatientId == patientId)
                 .OrderByDescending(rt => rt.CreatedAt)
                 .ToListAsync();

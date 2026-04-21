@@ -16,7 +16,8 @@ namespace OCR.Application.Features.Patients.Quaries.GetPatientHistory
         string? ContraindicatedMedicine,
         string? ContraindicatedReason,
         DateOnly? DateDocument,
-        DateTime? CreatedAt
+        DateTime? CreatedAt,
+        Guid DocumentId
     );
 }
 

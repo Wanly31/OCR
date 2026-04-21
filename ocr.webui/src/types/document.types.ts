@@ -5,4 +5,5 @@ export interface DocumentDto {
     FileExtension: string;
     FileSizeInBytes: number;
     FilePath: string;
+    DocumentId: string;
 }

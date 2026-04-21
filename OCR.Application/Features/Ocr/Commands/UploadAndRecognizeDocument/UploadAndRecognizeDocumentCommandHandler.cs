@@ -46,7 +46,9 @@ public class UploadAndRecognizeDocumentCommandHandler
         // 1. Зберігаємо файл через IFileStorage
         var extension = Path.GetExtension(request.File.FileName);
         string newName = Guid.NewGuid().ToString() + extension;
+       
         string savedFilePath = await _fileStorage.SaveFileAsync(request.File, newName);
+        _logger.LogInformation("File saved to: {Path}", savedFilePath);
 
         // 2. Створюємо доменну сутність Document
         var document = new Document
@@ -107,7 +109,9 @@ public class UploadAndRecognizeDocumentCommandHandler
             RecognizeData: extractedData,
             RecordStatus: Domain.Enums.RecordStatus.Pending,
             SimilarPatients: similarPatientDtos,
-            FilePath: savedFilePath
+            FilePath: savedFilePath,
+            DocumentId: document.Id
+            
         );
     }
 }

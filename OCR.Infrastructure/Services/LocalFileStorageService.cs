@@ -16,7 +16,6 @@ namespace OCR.Infrastructure.Services
         public async Task<string> SaveFileAsync(IFormFile file, string fileName)
         {
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Documents");
-
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 

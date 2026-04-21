@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './DocumentsPage.module.css'
+import { getDocumentStream } from '../../api/document.api'
 
 export default function DocumentsPage() {
     const navigate = useNavigate()
@@ -62,9 +63,15 @@ export default function DocumentsPage() {
 
 function DocumentByIdForm() {
     const [docId, setDocId] = useState('')
-    const handleOpen = () => {
+    const handleOpen = async () => {
         if (!docId.trim()) return
-        window.open(`/api/Document/${docId.trim()}/file`, '_blank')
+        try {
+            const blob = await getDocumentStream(docId.trim())
+            const url = URL.createObjectURL(blob)
+            window.open(url, '_blank')
+        } catch (error) {
+            console.error('Failed to load document stream', error)
+        }
     }
     return (
         <div className={styles.docIdForm}>

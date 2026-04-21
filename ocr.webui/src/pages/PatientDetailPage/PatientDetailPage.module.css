@@ -193,3 +193,104 @@
     color: #cbd5e1;
     line-height: 1.55;
 }
+
+.recordActions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(255,255,255,0.06);
+}
+
+.recordActions button {
+    border: none;
+    border-radius: 8px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.viewBtn {
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+}
+
+.viewBtn:hover {
+    background: rgba(99,102,241,0.25);
+}
+
+.deleteBtn {
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+    margin-left: auto;
+}
+
+.deleteBtn:hover {
+    background: rgba(239,68,68,0.25);
+}
+
+/* Document Drawer */
+.drawerOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.7);
+    z-index: 100;
+    display: flex;
+    justify-content: flex-end;
+    animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.drawer {
+    width: 600px;
+    max-width: 90vw;
+    background: #1e293b;
+    height: 100%;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.drawerHeader {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.drawerHeader h3 {
+    margin: 0;
+    color: #f1f5f9;
+    font-size: 1.1rem;
+}
+.closeDrawerBtn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+.closeDrawerBtn:hover {
+    color: #f1f5f9;
+}
+.iframeContainer {
+    flex: 1;
+    background: #0f172a;
+}
+.documentIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

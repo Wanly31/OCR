@@ -43,6 +43,7 @@ export interface MedicalRecord {
     ContraindicatedReason?: string;
     DateDocument?: string;
     CreatedAt?: string;
+    DocumentId: string;
 }
 
 

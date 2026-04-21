@@ -29,6 +29,7 @@ namespace OCR.Host.Controllers
             return File(result.FileStream, result.ContentType, result.FileName);
         }
 
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

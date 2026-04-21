@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getPatientById, getPatientHistory } from '../../api/patient.api'
 import type { PatientDetail, MedicalRecord } from '../../api/patient.api'
+import { deleteDocument, getDocumentStream } from '../../api/document.api'
 import styles from './PatientDetailPage.module.css'
 
 export default function PatientDetailPage() {
@@ -13,6 +14,7 @@ export default function PatientDetailPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [activeRecord, setActiveRecord] = useState<MedicalRecord | null>(null)
+    const [viewerUrl, setViewerUrl] = useState<string | null>(null)
 
     useEffect(() => {
         if (!id) return
@@ -51,6 +53,43 @@ export default function PatientDetailPage() {
     const formatDate = (d?: string | null) => {
         if (!d) return '—'
         try { return new Date(d).toLocaleDateString('uk-UA') } catch { return d }
+    }
+
+    const handleDelete = async (e: React.MouseEvent, docId: string) => {
+        e.stopPropagation()
+        if (!confirm('Ви впевнені, що хочете видалити цей документ?')) return
+        try {
+            await deleteDocument(docId)
+            setHistory(prev => prev.filter(r => r.Id !== docId))
+            if (activeRecord?.Id === docId) setActiveRecord(null)
+            if (patient) setPatient({ ...patient, TotalRecords: patient.TotalRecords - 1 })
+        } catch (err: any) {
+             if (err?.response?.status === 404) {
+                 alert('Цей документ вже було видалено або він не існує на сервері.')
+                 setHistory(prev => prev.filter(r => r.Id !== docId))
+                 if (activeRecord?.Id === docId) setActiveRecord(null)
+             } else {
+                 alert('Помилка при видаленні документа')
+             }
+        }
+    }
+
+    const handleView = async (e: React.MouseEvent, docId: string) => {
+        e.stopPropagation()
+        try {
+            const blob = await getDocumentStream(docId)
+            const url = URL.createObjectURL(blob)
+            setViewerUrl(url)
+        } catch (err) {
+            alert('Не вдалося завантажити документ для перегляду. Можливо він був видалений або недоступний.')
+        }
+    }
+
+    const closeViewer = () => {
+        if (viewerUrl) {
+            URL.revokeObjectURL(viewerUrl)
+            setViewerUrl(null)
+        }
     }
 
     return (
@@ -127,6 +166,14 @@ export default function PatientDetailPage() {
                                                 value={formatDate(rec.CreatedAt)}
                                             />
                                         )}
+                                        <div className={styles.recordActions}>
+                                            <button className={styles.viewBtn} onClick={(e) => handleView(e, rec.DocumentId)}>
+                                                👀 Переглянути документ
+                                            </button>
+                                            <button className={styles.deleteBtn} onClick={(e) => handleDelete(e, rec.DocumentId)}>
+                                                🗑️ Видалити
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -134,6 +181,21 @@ export default function PatientDetailPage() {
                     </div>
                 )}
             </div>
+
+            {/* Document Drawer Modal */}
+            {viewerUrl && (
+                <div className={styles.drawerOverlay} onClick={closeViewer}>
+                    <div className={styles.drawer} onClick={e => e.stopPropagation()}>
+                        <div className={styles.drawerHeader}>
+                            <h3>🔍 Перегляд документа</h3>
+                            <button className={styles.closeDrawerBtn} onClick={closeViewer}>×</button>
+                        </div>
+                        <div className={styles.iframeContainer}>
+                            <iframe src={viewerUrl} className={styles.documentIframe} title="Document Viewer" />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
