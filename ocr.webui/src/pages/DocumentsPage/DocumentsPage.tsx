@@ -41,22 +41,6 @@ export default function DocumentsPage() {
                     <DocumentByIdForm />
                 </div>
             </div>
-
-            <div className={styles.apiNote}>
-                <h4>📡 API ендпоінти документів</h4>
-                <div className={styles.endpoints}>
-                    <div className={styles.endpoint}>
-                        <span className={styles.method}>GET</span>
-                        <code>/api/Document/{'{id}'}/file</code>
-                        <span className={styles.endpointDesc}>Завантажити файл документа</span>
-                    </div>
-                    <div className={styles.endpoint}>
-                        <span className={`${styles.method} ${styles.delete}`}>DELETE</span>
-                        <code>/api/Document/{'{id}'}</code>
-                        <span className={styles.endpointDesc}>Видалити документ</span>
-                    </div>
-                </div>
-            </div>
         </div>
     )
 }

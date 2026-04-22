@@ -1,4 +1,4 @@
-﻿using OCR.Application.Common.Exceptions;
+using OCR.Application.Common.Exceptions;
 using System.Net;
 
 namespace OCR.Middlewares

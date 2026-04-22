@@ -66,9 +66,6 @@ namespace OCR.Infrastructure.Services
 
                 if (!string.IsNullOrEmpty(personEntity.Text))
                 {
-                    //var nameParts = personEntity.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    //result.FirstName = nameParts.FirstOrDefault();
-                    //result.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : null;
 
                     var (firstName, lastName) = SplitMedicalName(personEntity.Text);
 
@@ -274,19 +271,16 @@ namespace OCR.Infrastructure.Services
 
         /// <summary>
         /// Determines if a medication entity is contraindicated based on Azure's semantic assertion tags.
-        /// This is the primary (most reliable) detection method.
         /// </summary>
         private bool IsContraindicatedByAssertion(HealthcareEntity entity)
         {
             if (entity.Assertion == null)
                 return false;
 
-            // Negated certainty: "do NOT take Aspirin" → Negative or NegativePossible
             bool negatedCertainty =
                 entity.Assertion.Certainty == EntityCertainty.Negative ||
                 entity.Assertion.Certainty == EntityCertainty.NegativePossible;
 
-            // "Other" association: medication mentioned but NOT associated with THIS patient
             bool notAssociated =
                 entity.Assertion.Association == EntityAssociation.Other;
 
@@ -424,28 +418,22 @@ namespace OCR.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(fullName))
                 return (null, null);
 
-            // Очищення від зайвих символів, які часто з'являються після OCR
             var cleanName = fullName.Trim().Replace(",", "").Replace(".", ". ");
             var parts = cleanName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 0) return (null, null);
             if (parts.Length == 1) return (parts[0], null);
 
-            // Евристика: у Східній Європі в документах Прізвище часто йде ПЕРШИМ (Іванов Іван)
-            // Список типових закінчень прізвищ (UA/Root)
             string[] lastNameEndings = { "ов", "ва", "ко", "ий", "ін", "юк", "ак", "ич", "як", "ка" };
 
-            // Перевіряємо, чи перше слово схоже на прізвище
             bool isFirstWordLastName = lastNameEndings.Any(e =>
                 parts[0].EndsWith(e, StringComparison.OrdinalIgnoreCase));
 
             if (isFirstWordLastName)
             {
-                // Якщо перший - прізвище, то друге - ім'я
                 return (parts[1], parts[0]);
             }
 
-            // Стандартний західний формат (FirstName LastName)
             return (parts[0], string.Join(" ", parts.Skip(1)));
         }
     }

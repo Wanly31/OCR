@@ -7,19 +7,28 @@
     gap: 2rem;
 }
 
-.header {}
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;    
+}
+
 .title {
     font-size: 1.6rem;
     font-weight: 700;
     color: #f1f5f9;
     margin: 0 0 0.4rem;
+    text-align: center;
 }
+
 .subtitle {
     color: #64748b;
     font-size: 0.9rem;
-    margin: 0;
+    margin: 0 auto 0.4rem;
     line-height: 1.55;
     max-width: 580px;
+    text-align: center;
 }
 
 /* Info Grid */
@@ -96,57 +105,4 @@
 }
 .docIdForm input:focus {
     border-color: #6366f1;
-}
-
-/* API Note */
-.apiNote {
-    background: rgba(15,23,42,0.7);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 1.5rem;
-}
-.apiNote h4 {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #94a3b8;
-    margin: 0 0 1rem;
-}
-.endpoints {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-.endpoint {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-}
-.method {
-    background: rgba(6,182,212,0.15);
-    border: 1px solid rgba(6,182,212,0.3);
-    border-radius: 6px;
-    color: #06b6d4;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 0.2rem 0.55rem;
-    letter-spacing: 0.05em;
-    flex-shrink: 0;
-}
-.delete {
-    background: rgba(239,68,68,0.12);
-    border-color: rgba(239,68,68,0.3);
-    color: #f87171;
-}
-.endpoint code {
-    background: rgba(255,255,255,0.05);
-    border-radius: 6px;
-    color: #e2e8f0;
-    font-family: monospace;
-    font-size: 0.82rem;
-    padding: 0.2rem 0.55rem;
-}
-.endpointDesc {
-    color: #64748b;
-    font-size: 0.82rem;
 }
