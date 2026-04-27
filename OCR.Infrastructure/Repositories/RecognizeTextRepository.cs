@@ -6,11 +6,11 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace OCR.Infrastructure.Repositories
 {
-    public class LocalRecognizeTextRepository : IRecognizeTextRepository
+    public class RecognizeTextRepository : IRecognizeTextRepository
     {
         private readonly OCRDbContext dbContext;
 
-        public LocalRecognizeTextRepository(OCRDbContext dbContext)
+        public RecognizeTextRepository(OCRDbContext dbContext)
         {
             this.dbContext = dbContext;
         }

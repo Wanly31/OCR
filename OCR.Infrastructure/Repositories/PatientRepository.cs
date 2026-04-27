@@ -6,12 +6,12 @@ using OCR.Infrastructure.Data;
 
 namespace OCR.Infrastructure.Repositories
 {
-    public class LocalPatientRepository : IPatientRepository
+    public class PatientRepository : IPatientRepository
     {
         private readonly OCRDbContext _dbContext;
-        private readonly ILogger<LocalPatientRepository> _logger;
+        private readonly ILogger<PatientRepository> _logger;
 
-        public LocalPatientRepository(OCRDbContext dbContext, ILogger<LocalPatientRepository> logger)
+        public PatientRepository(OCRDbContext dbContext, ILogger<PatientRepository> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

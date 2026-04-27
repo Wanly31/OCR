@@ -9,13 +9,13 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace OCR.Infrastructure.Repositories
 {
-    public class LocalDocumentRepository : IDocumentRepository
+    public class DocumentRepository : IDocumentRepository
     {
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly OCRDbContext dbContext;
 
-        public LocalDocumentRepository(IWebHostEnvironment webHostEnvironment, IHttpContextAccessor httpContextAccessor, OCRDbContext dbContext)
+        public DocumentRepository(IWebHostEnvironment webHostEnvironment, IHttpContextAccessor httpContextAccessor, OCRDbContext dbContext)
         {
             this.webHostEnvironment = webHostEnvironment;
             this.httpContextAccessor = httpContextAccessor;

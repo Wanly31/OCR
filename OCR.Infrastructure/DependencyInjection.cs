@@ -20,10 +20,10 @@ namespace OCR.Infrastructure
                 options.UseSqlServer(configuration.GetConnectionString("OCRConnectionString")));
 
             services.AddScoped<ITokenService, TokenRepository>();
-            services.AddScoped<IDocumentRepository, LocalDocumentRepository>();
-            services.AddScoped<IRecognizeTextRepository, LocalRecognizeTextRepository>();
-            services.AddScoped<IRecognizeRepository, LocalRecognizeRepository>();
-            services.AddScoped<IPatientRepository, LocalPatientRepository>();
+            services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IRecognizeTextRepository, RecognizeTextRepository>();
+            services.AddScoped<IRecognizeRepository, RecognizeRepository>();
+            services.AddScoped<IPatientRepository, PatientRepository>();
             services.AddScoped<IOcrProvider, AzureOcrService>();
             services.AddScoped<IMedicalExtractionService, AzureMedicalTextExtractionService>();
             services.AddScoped<IFileStorage, LocalFileStorageService>();

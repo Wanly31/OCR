@@ -6,12 +6,12 @@ using OCR.Infrastructure.Data;
 
 namespace OCR.Infrastructure.Repositories
 {
-    public class LocalRecognizeRepository : IRecognizeRepository
+    public class RecognizeRepository : IRecognizeRepository
     {
 
         private readonly OCRDbContext dbContext;
 
-        public LocalRecognizeRepository(OCRDbContext dbContext)
+        public RecognizeRepository(OCRDbContext dbContext)
         {
             this.dbContext = dbContext;
         }

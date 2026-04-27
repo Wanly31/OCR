@@ -67,3 +67,5 @@ Documents/
 !Documents/.gitkeep
 
 Migrations/
+
+/tests
