@@ -10,7 +10,7 @@ namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class OcrController : ControllerBase
     {
         private readonly IMediator _mediator;

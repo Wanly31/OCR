@@ -45,6 +45,7 @@ app.UseSwaggerMiddleware();
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecifiOrigin);
 
+
 app.UseAuthentication();
 app.UseAuthorization();
 

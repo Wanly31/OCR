@@ -66,6 +66,5 @@ Documents/
 # Але зберігаємо саму папку Documents
 !Documents/.gitkeep
 
-Migrations/
 
 /tests

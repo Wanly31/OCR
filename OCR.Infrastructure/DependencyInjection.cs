@@ -26,7 +26,8 @@ namespace OCR.Infrastructure
             services.AddScoped<IPatientRepository, PatientRepository>();
             services.AddScoped<IOcrProvider, AzureOcrService>();
             services.AddScoped<IMedicalExtractionService, AzureMedicalTextExtractionService>();
-            services.AddScoped<IFileStorage, LocalFileStorageService>();
+            services.AddScoped<IFileStorage, AzureBlobStorageService>();
+
 
             services.AddIdentityCore<IdentityUser>()
                 .AddRoles<IdentityRole>()

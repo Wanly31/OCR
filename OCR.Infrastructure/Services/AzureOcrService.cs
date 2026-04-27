@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
-using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
+﻿using Azure.AI.Vision.ImageAnalysis;
 using Microsoft.Extensions.Configuration;
 using OCR.Application.Abstractions;
 using System.Text;
@@ -17,37 +16,36 @@ namespace OCR.Infrastructure.Services
             key = configuration["AzureComputerVision:Key"]!;
         }
 
-        private ComputerVisionClient Authenticate()
+        private ImageAnalysisClient Authenticate()
         {
-            return new ComputerVisionClient(new ApiKeyServiceClientCredentials(key))
-            {
-                Endpoint = endpoint
-            };
+            ImageAnalysisClient client =  new ImageAnalysisClient(new Uri(endpoint), new Azure.AzureKeyCredential(key));
+            return client;
         }
 
-        public async Task<string> RecognizeTextFromFileAsync(string filePath)
+        /// <summary>
+        /// Extract text from a document using OCR
+        /// </summary>
+        /// <param name="filePath">Path to the document file</param>
+        /// <returns>Returns recognized text from the image</returns>
+        public async Task<string> RecognizeTextFromFileAsync(string uriString)
         {
             var client = Authenticate();
-
-            using var stream = File.OpenRead(filePath);
-            var textHeaders = await client.ReadInStreamAsync(stream);
-
-            string operationLocation = textHeaders.OperationLocation;
-            string operationId = operationLocation.Split('/').Last();
-
-            ReadOperationResult results;
-            do
-            {
-                results = await client.GetReadResultAsync(Guid.Parse(operationId));
-                await Task.Delay(1000);
-            }
-            while (results.Status == OperationStatusCodes.Running);
+            
+            ImageAnalysisResult result = await client.AnalyzeAsync(
+                new Uri(uriString),
+                VisualFeatures.Read);
 
             var sb = new StringBuilder();
-            foreach (var page in results.AnalyzeResult.ReadResults)
-                foreach (var line in page.Lines)
-                    sb.AppendLine(line.Text);
 
+            if (result.Read != null) {
+                foreach (var block in result.Read.Blocks)
+                {
+                    foreach (var line in block.Lines)
+                    {
+                        sb.AppendLine(line.Text);
+                    } 
+                }
+            }
             return sb.ToString();
         }
 

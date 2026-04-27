@@ -36,6 +36,7 @@ public class UploadAndRecognizeDocumentCommandHandler
         _patientRepo = patientRepo;
         _fileStorage = fileStorage;
         _logger = logger;
+        
     }
 
     public async Task<UploadAndRecognizeDocumentResult> Handle(
@@ -47,8 +48,8 @@ public class UploadAndRecognizeDocumentCommandHandler
         var extension = Path.GetExtension(request.File.FileName);
         string newName = Guid.NewGuid().ToString() + extension;
        
-        string savedFilePath = await _fileStorage.SaveFileAsync(request.File, newName);
-        _logger.LogInformation("File saved to: {Path}", savedFilePath);
+        string uriString = await _fileStorage.SaveFileAsync(request.File, newName);
+        _logger.LogInformation("File saved to: {Path}", uriString);
 
         // 2. Створюємо доменну сутність Document
         var document = new Document
@@ -58,13 +59,13 @@ public class UploadAndRecognizeDocumentCommandHandler
             FileDescription = request.FileDescription,
             FileExtension = extension,
             FileSizeInBytes = request.File.Length,
-            FilePath = savedFilePath // Шлях куди IFileStorage зберіг файл
+            FilePath = uriString // Шлях куди IFileStorage зберіг файл
         };
 
         await _documentRepo.Upload(document);
 
         // 3. OCR розпознавання тексту з файлу
-        string recognizedText = await _ocrProvider.RecognizeTextFromFileAsync(savedFilePath);
+        string recognizedText = await _ocrProvider.RecognizeTextFromFileAsync(uriString);
 
         if (string.IsNullOrWhiteSpace(recognizedText))
         {
@@ -109,7 +110,7 @@ public class UploadAndRecognizeDocumentCommandHandler
             RecognizeData: extractedData,
             RecordStatus: Domain.Enums.RecordStatus.Pending,
             SimilarPatients: similarPatientDtos,
-            FilePath: savedFilePath,
+            FilePath: uriString,
             DocumentId: document.Id
             
         );
