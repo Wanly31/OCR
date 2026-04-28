@@ -39,6 +39,7 @@ namespace OCR.Application.Features.Documents.Commands.DeleteDocument
             // 2. отримуємо recognize по DocumentId
             var recognize = await _recognizeRepository.GetByIdAsync(document.Id);
 
+
             RecognizeText? recognizeText = null;
 
             if (recognize != null)
@@ -47,7 +48,7 @@ namespace OCR.Application.Features.Documents.Commands.DeleteDocument
             }
 
             // 3. видаляємо файл
-            await _fileStorage.DeleteFileAsync(document.FilePath);
+            await _fileStorage.DeleteFileAsync(document.FileName);
 
             // 4. видаляємо recognize
             if (recognize != null)

@@ -6,7 +6,7 @@ export const RecordStatus = {
 
 export type RecordStatus = typeof RecordStatus[keyof typeof RecordStatus]
 
-    export interface OcrRequest{
+export interface OcrRequest {
     File: File
     Filename: string
     FileDescription?: string
@@ -33,18 +33,18 @@ export interface SimilarPatientResultDto {
     RecordCount: number
 }
 
-export interface OcrResult{
+export interface OcrResult {
     RequiresConfirmation: boolean
     RecognizedId: string
     RecognizeData: RecognizedTextResultDto
     RecordStatus: RecordStatus
     FilePath: string
     SimilarPatients: SimilarPatientResultDto[]
-
+    DocumentId: string
 }
 
 //SaveMedicalRecord
-export interface SaveMedicalRecordRequest{
+export interface SaveMedicalRecordRequest {
     ExistingPatientId?: string
     FirstName: string
     LastName?: string
@@ -53,7 +53,7 @@ export interface SaveMedicalRecordRequest{
     RecognizedData: RecognizedDataDto
 }
 
-export interface SaveMedicalRecordResult{
+export interface SaveMedicalRecordResult {
     Id: string
     FirstName: string
     LastName?: string
@@ -65,6 +65,6 @@ export interface RecognizedDataDto {
     Medicine?: string
     Treatment?: string
     ContraindicatedMedicine?: string
-    ContraindicatedReason?:string
+    ContraindicatedReason?: string
     DateDocument?: string
 }

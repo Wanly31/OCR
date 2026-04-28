@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { saveMedicalRecord } from '../../api/ocr.api'
+import { getDocumentStream } from '../../api/document.api'
 import type { OcrResult, RecognizedDataDto } from '../../types/ocr.types'
 import styles from './ReviewPage.module.css'
 
@@ -12,6 +13,7 @@ export default function ReviewPage() {
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [viewerUrl, setViewerUrl] = useState<string | null>(null)
 
     const [patientInfo, setPatientInfo] = useState({
         FirstName: result?.RecognizeData?.FirstName || '',
@@ -33,13 +35,31 @@ export default function ReviewPage() {
     useEffect(() => {
         if (!result) {
             navigate('/upload')
+            return
+        }
+
+        if (result.DocumentId) {
+            getDocumentStream(result.DocumentId)
+                .then(blob => {
+                    const url = URL.createObjectURL(blob)
+                    setViewerUrl(url)
+                })
+                .catch(err => {
+                    console.error("Failed to load document preview", err)
+                })
         }
     }, [result, navigate])
 
-    if (!result) return null;
+    // Cleanup object URL
+    useEffect(() => {
+        return () => {
+            if (viewerUrl) {
+                URL.revokeObjectURL(viewerUrl)
+            }
+        }
+    }, [viewerUrl])
 
-    const fileName = result.FilePath ? result.FilePath.split('\\').pop()?.split('/').pop() : ''
-    const documentUrl = fileName ? `/Documents/${fileName}` : ''
+    if (!result) return null;
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
@@ -92,14 +112,14 @@ export default function ReviewPage() {
                 <div className={styles.documentPanel}>
                     <h2 className={styles.sectionTitle}>📄 Оригінальний документ</h2>
                     <div className={styles.iframeContainer}>
-                        {documentUrl ? (
-                            <iframe 
-                                src={documentUrl} 
-                                title="Original Document" 
+                        {viewerUrl ? (
+                            <iframe
+                                src={viewerUrl}
+                                title="Original Document"
                                 className={styles.iframe}
                             />
                         ) : (
-                            <div className={styles.noDocument}>Документ не знайдено</div>
+                            <div className={styles.noDocument}>Документ завантажується...</div>
                         )}
                     </div>
                 </div>
@@ -107,7 +127,7 @@ export default function ReviewPage() {
                 {/* ПРАВА КОЛОНКА: Форма редагування */}
                 <div className={styles.formPanel}>
                     <form onSubmit={handleSubmit} className={styles.form}>
-                        
+
                         {/* Блок 1: Пацієнт */}
                         <div className={styles.formSection}>
                             <h2 className={styles.sectionTitle}>👤 Дані пацієнта</h2>
@@ -116,8 +136,8 @@ export default function ReviewPage() {
                             {result.SimilarPatients && result.SimilarPatients.length > 0 && (
                                 <div className={styles.similarPatients}>
                                     <label>Або виберіть існуючого пацієнта з бази:</label>
-                                    <select 
-                                        value={selectedPatientId} 
+                                    <select
+                                        value={selectedPatientId}
                                         onChange={e => setSelectedPatientId(e.target.value)}
                                         className={styles.select}
                                     >
@@ -135,31 +155,31 @@ export default function ReviewPage() {
                             <div className={styles.grid2}>
                                 <div className={styles.field}>
                                     <label>Ім'я *</label>
-                                    <input 
-                                        required 
-                                        type="text" 
+                                    <input
+                                        required
+                                        type="text"
                                         disabled={!!selectedPatientId}
                                         value={patientInfo.FirstName}
-                                        onChange={e => setPatientInfo({...patientInfo, FirstName: e.target.value})}
+                                        onChange={e => setPatientInfo({ ...patientInfo, FirstName: e.target.value })}
                                     />
                                 </div>
                                 <div className={styles.field}>
                                     <label>Прізвище</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         disabled={!!selectedPatientId}
                                         value={patientInfo.LastName}
-                                        onChange={e => setPatientInfo({...patientInfo, LastName: e.target.value})}
+                                        onChange={e => setPatientInfo({ ...patientInfo, LastName: e.target.value })}
                                     />
                                 </div>
                             </div>
                             <div className={styles.field}>
                                 <label>Дата народження (YYYY-MM-DD)</label>
-                                <input 
+                                <input
                                     type="date"
                                     disabled={!!selectedPatientId}
                                     value={patientInfo.BirthDate}
-                                    onChange={e => setPatientInfo({...patientInfo, BirthDate: e.target.value})}
+                                    onChange={e => setPatientInfo({ ...patientInfo, BirthDate: e.target.value })}
                                 />
                             </div>
                         </div>
@@ -170,55 +190,55 @@ export default function ReviewPage() {
 
                             <div className={styles.field}>
                                 <label>Дата документу</label>
-                                <input 
+                                <input
                                     type="date"
                                     value={medicalData.DateDocument}
-                                    onChange={e => setMedicalData({...medicalData, DateDocument: e.target.value})}
+                                    onChange={e => setMedicalData({ ...medicalData, DateDocument: e.target.value })}
                                 />
                             </div>
 
                             <div className={styles.field}>
                                 <label>Обстеження/Анамнез</label>
-                                <textarea 
+                                <textarea
                                     rows={3}
                                     value={medicalData.Examination}
-                                    onChange={e => setMedicalData({...medicalData, Examination: e.target.value})}
+                                    onChange={e => setMedicalData({ ...medicalData, Examination: e.target.value })}
                                 />
                             </div>
 
                             <div className={styles.field}>
                                 <label>Призначене лікування</label>
-                                <textarea 
+                                <textarea
                                     rows={2}
                                     value={medicalData.Treatment}
-                                    onChange={e => setMedicalData({...medicalData, Treatment: e.target.value})}
+                                    onChange={e => setMedicalData({ ...medicalData, Treatment: e.target.value })}
                                 />
                             </div>
 
                             <div className={styles.field}>
                                 <label>Препарати</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={medicalData.Medicine}
-                                    onChange={e => setMedicalData({...medicalData, Medicine: e.target.value})}
+                                    onChange={e => setMedicalData({ ...medicalData, Medicine: e.target.value })}
                                 />
                             </div>
 
                             <div className={styles.grid2}>
                                 <div className={styles.field}>
                                     <label>Протипоказані ліки</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         value={medicalData.ContraindicatedMedicine}
-                                        onChange={e => setMedicalData({...medicalData, ContraindicatedMedicine: e.target.value})}
+                                        onChange={e => setMedicalData({ ...medicalData, ContraindicatedMedicine: e.target.value })}
                                     />
                                 </div>
                                 <div className={styles.field}>
                                     <label>Причина протипоказання</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         value={medicalData.ContraindicatedReason}
-                                        onChange={e => setMedicalData({...medicalData, ContraindicatedReason: e.target.value})}
+                                        onChange={e => setMedicalData({ ...medicalData, ContraindicatedReason: e.target.value })}
                                     />
                                 </div>
                             </div>

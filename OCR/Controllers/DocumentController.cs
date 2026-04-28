@@ -9,7 +9,7 @@ namespace OCR.Host.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class DocumentController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -26,7 +26,8 @@ namespace OCR.Host.Controllers
         public async Task<IActionResult> GetFile(Guid id)
         {
             var result = await _mediator.Send(new GetDocumentStreamQuery(id));
-            return File(result.FileStream, result.ContentType, result.FileName);
+            // Без FileName — браузер відображає inline (не примусово скачує)
+            return File(result.FileStream, result.ContentType);
         }
 
 

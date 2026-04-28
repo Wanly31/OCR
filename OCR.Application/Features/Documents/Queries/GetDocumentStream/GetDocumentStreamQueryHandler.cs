@@ -7,10 +7,12 @@ namespace OCR.Application.Features.Documents.Queries.GetDocumentStream
     public class GetDocumentStreamQueryHandler : IRequestHandler<GetDocumentStreamQuery, DocumentStreamResult>
     {
         private readonly IDocumentRepository _documentRepository;
+        private readonly IFileStorage _fileStorage;
         
-        public GetDocumentStreamQueryHandler(IDocumentRepository documentRepository)
+        public GetDocumentStreamQueryHandler(IDocumentRepository documentRepository, IFileStorage fileStorage)
         {
             _documentRepository = documentRepository;
+            _fileStorage = fileStorage;
         }
 
         public async Task<DocumentStreamResult> Handle(GetDocumentStreamQuery request, CancellationToken cancellationToken)
@@ -21,18 +23,9 @@ namespace OCR.Application.Features.Documents.Queries.GetDocumentStream
             {
                 throw new NotFoundException("Document not found, id: ", request.Id);
             }
-            
-            if (!File.Exists(document.FilePath))
-            {
-                throw new NotFoundException("File not found on disk, id: ", request.Id);
-            }
-            // будуй повний шлях динамічно
-            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "Documents", document.FilePath);
 
-            if (!File.Exists(fullPath))
-                throw new NotFoundException("File not found on disk, id: ", request.Id);
-
-            var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+            // Завантажуємо через IFileStorage — підтримує і Azure Blob, і локальний диск
+            var fileStream = await _fileStorage.GetFileStreamAsync(document.FilePath);
             var contentType = GetContentType(document.FileExtension);
 
             return new DocumentStreamResult(
@@ -40,9 +33,6 @@ namespace OCR.Application.Features.Documents.Queries.GetDocumentStream
                 ContentType: contentType,
                 FileName: document.FileName
             );
-
-
-
         }
 
         private static string GetContentType(string extension)

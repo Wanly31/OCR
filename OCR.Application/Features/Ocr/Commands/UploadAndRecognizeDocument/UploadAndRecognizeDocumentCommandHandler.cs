@@ -48,10 +48,10 @@ public class UploadAndRecognizeDocumentCommandHandler
         var extension = Path.GetExtension(request.File.FileName);
         string newName = Guid.NewGuid().ToString() + extension;
        
-        string uriString = await _fileStorage.SaveFileAsync(request.File, newName);
-        _logger.LogInformation("File saved to: {Path}", uriString);
+        string blobName = await _fileStorage.SaveFileAsync(request.File, newName);
+        _logger.LogInformation("File saved to blob: {BlobName}", blobName);
 
-        // 2. Створюємо доменну сутність Document
+        // 2. Створюємо доменну сутність Document (зберігаємо SAS URL)
         var document = new Document
         {
             Id = Guid.NewGuid(),
@@ -59,13 +59,17 @@ public class UploadAndRecognizeDocumentCommandHandler
             FileDescription = request.FileDescription,
             FileExtension = extension,
             FileSizeInBytes = request.File.Length,
-            FilePath = uriString // Шлях куди IFileStorage зберіг файл
+            FilePath = blobName
         };
 
         await _documentRepo.Upload(document);
 
-        // 3. OCR розпознавання тексту з файлу
-        string recognizedText = await _ocrProvider.RecognizeTextFromFileAsync(uriString);
+        // 3. Отримуємо свіжий URL для OCR (SAS URL, дійсний 1 год)
+        string fileUrl = await _fileStorage.GetFileUrlAsync(blobName);
+        _logger.LogInformation("Got file URL for OCR: {Url}", fileUrl);
+
+        // 4. OCR розпізнавання тексту з файлу
+        string recognizedText = await _ocrProvider.RecognizeTextFromFileAsync(fileUrl);
 
         if (string.IsNullOrWhiteSpace(recognizedText))
         {
@@ -110,9 +114,8 @@ public class UploadAndRecognizeDocumentCommandHandler
             RecognizeData: extractedData,
             RecordStatus: Domain.Enums.RecordStatus.Pending,
             SimilarPatients: similarPatientDtos,
-            FilePath: uriString,
+            FilePath: blobName,
             DocumentId: document.Id
-            
         );
     }
 }
