@@ -35,6 +35,7 @@ var logger = new LoggerConfiguration()
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
+
 builder.Services.AddInfrastructureDI(builder.Configuration);
 builder.Services.AddPresentation(builder.Configuration);
 builder.Services.AddApplication();
@@ -61,6 +62,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Documents"
     //https://localhost:7242/Images/filename.jpg
 });
+
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.MapControllers();
 
