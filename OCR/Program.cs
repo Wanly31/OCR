@@ -3,11 +3,15 @@ using Serilog;
 using OCR.Infrastructure;
 using OCR.Host.Extensions;
 using OCR.Application;
-using OCR.Middlewares;
+using OCR.Host.Middlewares;
 
 var MyAllowSpecifiOrigin = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Adds services for using Problem Details format
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ExceptionHandlerMiddlewareP>();
 
 var origins = builder.Configuration
     .GetSection("AllowedOrigins")
@@ -42,6 +46,10 @@ builder.Services.AddApplication();
 
 var app = builder.Build();
 
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 app.UseSwaggerMiddleware();
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecifiOrigin);
@@ -63,7 +71,7 @@ app.UseStaticFiles(new StaticFileOptions
     //https://localhost:7242/Images/filename.jpg
 });
 
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+
 app.MapControllers();
 
 await app.RunAsync();
