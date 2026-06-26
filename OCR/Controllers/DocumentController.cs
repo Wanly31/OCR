@@ -20,7 +20,7 @@ namespace OCR.Host.Controllers
 
         [HttpGet("{id}/file")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetFile(Guid id)
         {
             var result = await _mediator.Send(new GetDocumentStreamQuery(id));
@@ -29,7 +29,7 @@ namespace OCR.Host.Controllers
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id)
         {
             var documentModel = await _mediator.Send(new DeleteDocumentCommand(id));

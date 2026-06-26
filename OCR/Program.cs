@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Adds services for using Problem Details format
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<ExceptionHandlerMiddlewareP>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var origins = builder.Configuration
     .GetSection("AllowedOrigins")

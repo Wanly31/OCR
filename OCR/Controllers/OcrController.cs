@@ -22,7 +22,7 @@ namespace OCR.Host.Controllers
 
         [HttpPost("UploadAndRecognize")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Upload([FromForm] UploadAndRecognizeDocumentCommand command)
         {
             var result = await _mediator.Send(command);
@@ -31,7 +31,7 @@ namespace OCR.Host.Controllers
 
         [HttpPost("SaveMedicalRecord")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SaveMedicalRecord([FromBody] SaveMedicalRecordCommand command)
         {
             var result = await _mediator.Send(command);
@@ -40,7 +40,7 @@ namespace OCR.Host.Controllers
 
         [HttpGet("GetRecognizeResultById/{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _mediator.Send(new GetRecognizeResultByIdQuery(id));

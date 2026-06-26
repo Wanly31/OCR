@@ -23,6 +23,7 @@ namespace OCR.Host.Controllers
         // POST /api/Patient/search
         [HttpPost("search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SearchSimilar([FromBody] SearchPatientQuery quaries)
         {
             var result = await _mediator.Send(quaries);
@@ -32,7 +33,7 @@ namespace OCR.Host.Controllers
         // GET /api/Patient/{id}
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _mediator.Send(new GetPatientByIdQuery(id));
@@ -42,7 +43,7 @@ namespace OCR.Host.Controllers
         // GET /api/Patient/{id}/history
         [HttpGet("{id:guid}/history")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPatientHistory(Guid id)
         {
 
