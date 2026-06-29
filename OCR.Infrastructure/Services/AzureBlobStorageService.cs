@@ -6,7 +6,7 @@ using OCR.Application.Abstractions;
 
 namespace OCR.Infrastructure.Services
 {
-    internal class AzureBlobStorageService : IFileStorage
+    public class AzureBlobStorageService : IFileStorage
     {
         private readonly string _connectionString;
         private readonly string _containerName;

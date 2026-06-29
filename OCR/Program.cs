@@ -9,7 +9,7 @@ var MyAllowSpecifiOrigin = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Adds services for using Problem Details format
+//Add services for using Problem Details format
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -49,6 +49,8 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+app.MapHealthChecks("/health");
 
 app.UseSwaggerMiddleware();
 app.UseHttpsRedirection();

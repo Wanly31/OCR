@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OCR.Application.Abstractions;
 using OCR.Infrastructure.Data;
+using OCR.Infrastructure.HealthCheck;
 using OCR.Infrastructure.Repositories;
 using OCR.Infrastructure.Services;
 
@@ -18,6 +19,12 @@ namespace OCR.Infrastructure
                 options.UseSqlServer(configuration.GetConnectionString("OCRAuthConnectionString")));
             services.AddDbContext<OCRDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("OCRConnectionString")));
+
+            //Health check
+            services.AddHealthChecks()
+                .AddDbContextCheck<OCRAuthDbContext>("OCRAuthConnectionString")
+                .AddDbContextCheck<OCRDbContext>("OCRConnectionString")
+                .AddCheck<AzureBlobStorageHealthCheck>("Blob storage");
 
             services.AddScoped<ITokenService, TokenRepository>();
             services.AddScoped<IDocumentRepository, DocumentRepository>();
