@@ -17,6 +17,7 @@ public class UploadAndRecognizeDocumentCommandHandler
     private readonly IPatientRepository _patientRepo;
     private readonly IFileStorage _fileStorage;
     private readonly ILogger<UploadAndRecognizeDocumentCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UploadAndRecognizeDocumentCommandHandler(
         IDocumentRepository documentRepo,
@@ -26,7 +27,8 @@ public class UploadAndRecognizeDocumentCommandHandler
         IMedicalExtractionService extractionService,
         IPatientRepository patientRepo,
         IFileStorage fileStorage,
-        ILogger<UploadAndRecognizeDocumentCommandHandler> logger)
+        ILogger<UploadAndRecognizeDocumentCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _documentRepo = documentRepo;
         _recognizeRepo = recognizeRepo;
@@ -36,7 +38,9 @@ public class UploadAndRecognizeDocumentCommandHandler
         _patientRepo = patientRepo;
         _fileStorage = fileStorage;
         _logger = logger;
-        
+        _unitOfWork = unitOfWork;
+
+
     }
 
     public async Task<UploadAndRecognizeDocumentResult> Handle(
@@ -85,6 +89,7 @@ public class UploadAndRecognizeDocumentCommandHandler
             Text = recognizedText
         };
         await _recognizeRepo.SaveRecognizedTextAsync(recognizeResult);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 5. Витягування медичних даних із сирого тексту (Entities & NLP)
         _logger.LogInformation("Extracting structured data from recognized text");

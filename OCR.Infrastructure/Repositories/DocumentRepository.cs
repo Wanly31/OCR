@@ -28,7 +28,6 @@ namespace OCR.Infrastructure.Repositories
             }
 
             dbContext.Documents.Remove(existingDocument);
-            await dbContext.SaveChangesAsync();
             return existingDocument;
         }
 
@@ -53,14 +52,12 @@ namespace OCR.Infrastructure.Repositories
             }
             existingDocument.FileDescription = documentDomainModel.FileDescription;
             existingDocument.FileName = documentDomainModel.FileName;
-            await dbContext.SaveChangesAsync();
             return existingDocument;
         }
 
         public async Task<Document> Upload(Document document)
         {
             await dbContext.Documents.AddAsync(document);
-            await dbContext.SaveChangesAsync();
 
             return document;
         }

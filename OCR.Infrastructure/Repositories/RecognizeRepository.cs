@@ -25,7 +25,6 @@ namespace OCR.Infrastructure.Repositories
             }
 
             dbContext.RecognizedTexts.Remove(existingRecognize);
-            await dbContext.SaveChangesAsync();
             return existingRecognize;
 
         }
@@ -52,7 +51,6 @@ namespace OCR.Infrastructure.Repositories
         public async Task SaveRecognizedTextAsync(Recognize text)
         {
             await dbContext.RecognizedTexts.AddAsync(text);
-            await dbContext.SaveChangesAsync();
         }
 
         public async Task<Recognize> UpdateAsync(Guid id, Recognize textDomainModel)
@@ -66,7 +64,6 @@ namespace OCR.Infrastructure.Repositories
 
             existingText.Text = textDomainModel.Text;
 
-            await dbContext.SaveChangesAsync();
             return existingText;
         }
     }

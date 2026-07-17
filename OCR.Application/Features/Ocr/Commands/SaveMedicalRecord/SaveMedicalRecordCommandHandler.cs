@@ -13,18 +13,21 @@ namespace OCR.Application.Features.Ocr.Commands.SaveMedicalRecord
         private readonly ILogger<SaveMedicalRecordCommandHandler> _logger;
         private readonly IRecognizeTextRepository _recognizeTextRepository;
         private readonly IRecognizeRepository _recognizeRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public SaveMedicalRecordCommandHandler(
             ILogger<SaveMedicalRecordCommandHandler> logger,
             IPatientRepository patientRepository,
             IRecognizeTextRepository recognizeTextRepository,
-            IRecognizeRepository recognizeRepository
+            IRecognizeRepository recognizeRepository,
+            IUnitOfWork unitOfWork
             )
         {
             _logger = logger;
             _patientRepository = patientRepository;
             _recognizeTextRepository = recognizeTextRepository;
             _recognizeRepository = recognizeRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<SaveMedicalRecordResult> Handle(SaveMedicalRecordCommand request, CancellationToken cancellationToken)
@@ -78,6 +81,7 @@ namespace OCR.Application.Features.Ocr.Commands.SaveMedicalRecord
             };
 
             await _recognizeTextRepository.SaveRecognizedTextAsync(recognizeText);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Medical record saved successfully for patient {PatientId}", patient.Id);
 

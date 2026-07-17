@@ -24,7 +24,6 @@ namespace OCR.Infrastructure.Repositories
             }
 
             dbContext.RecognizedDocuments.Remove(existingText);
-            await dbContext.SaveChangesAsync();
             return existingText;
         }
 
@@ -46,8 +45,7 @@ namespace OCR.Infrastructure.Repositories
         public async Task SaveRecognizedTextAsync(RecognizeText text)
         {
             await dbContext.RecognizedDocuments.AddAsync(text);
-            await dbContext.SaveChangesAsync();
-        }
+         }
 
         // TODO: Update this method after Patient model migration is complete
         // This method uses deprecated RecognizeText.FirstName/LastName which have been moved to Patient model
@@ -87,7 +85,7 @@ namespace OCR.Infrastructure.Repositories
             existingText.ContraindicatedReason = textDomainModel.ContraindicatedReason;
             existingText.DateDocument = textDomainModel.DateDocument;
             
-            await dbContext.SaveChangesAsync();
+            
             return existingText;
         }
     }

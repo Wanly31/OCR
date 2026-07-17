@@ -12,19 +12,22 @@ namespace OCR.Application.Features.Documents.Commands.DeleteDocument
         private readonly IPatientRepository _patientRepository;
         private readonly IRecognizeRepository _recognizeRepository;
         private readonly IRecognizeTextRepository _recognizeTextRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public DeleteDocumentCommandHandler(
             IDocumentRepository documentRepository,
             IFileStorage fileStorage,
             IPatientRepository patientRepository,
             IRecognizeRepository recognizeRepository,
-            IRecognizeTextRepository recognizeTextRepository)
+            IRecognizeTextRepository recognizeTextRepository,
+            IUnitOfWork unitOfWork)
         {
             _documentRepository = documentRepository;
             _fileStorage = fileStorage;
             _patientRepository = patientRepository;
             _recognizeRepository = recognizeRepository;
             _recognizeTextRepository = recognizeTextRepository;
+            _unitOfWork = unitOfWork;
         }
 
 
@@ -69,6 +72,7 @@ namespace OCR.Application.Features.Documents.Commands.DeleteDocument
 
             // 6. видаляємо document
             await _documentRepository.DeleteAsync(document.Id);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new DeleteDocumentResult(true);
         }

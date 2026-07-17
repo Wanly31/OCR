@@ -71,7 +71,6 @@ namespace OCR.Infrastructure.Repositories
             patient.CreatedAt = DateTime.UtcNow;
 
             await _dbContext.Patients.AddAsync(patient);
-            await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation($"Created new patient: {patient.Id} - {patient.FirstName} {patient.LastName}");
 
@@ -92,7 +91,6 @@ namespace OCR.Infrastructure.Repositories
             existing.BirthDate = patient.BirthDate;
             existing.UpdatedAt = DateTime.UtcNow;
 
-            await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation($"Updated patient: {id}");
 
@@ -109,7 +107,6 @@ namespace OCR.Infrastructure.Repositories
             }
 
             _dbContext.Patients.Remove(existingPatient);
-            await _dbContext.SaveChangesAsync();
             return existingPatient;
         }
     }
